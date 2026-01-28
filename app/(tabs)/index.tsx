@@ -38,7 +38,7 @@ const muscleGroups: MuscleGroup[] = [
   {
     id: 'chest',
     name: 'Chest',
-    bodyParts: [{ slug: 'chest', intensity: 2 }],
+    bodyParts: [{ slug: 'chest', intensity: 100 }],
   },
   {
     id: 'neck',
@@ -129,7 +129,7 @@ export default function WorkoutScreen() {
             gender="male"
             side="front"
             scale={1.5}
-            colors={['#c6ff00']}
+            colors={['#22c55e']}
           />
         </View>
       </View>
@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   muscleButtonSelected: {
-    borderColor: '#c6ff00',
-    backgroundColor: 'rgba(198, 255, 0, 0.05)',
+    borderColor: '#22c55e',
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
   },
   checkbox: {
     width: 24,
@@ -180,8 +180,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxSelected: {
-    backgroundColor: '#c6ff00',
-    borderColor: '#c6ff00',
+    backgroundColor: '#22c55e',
+    borderColor: '#22c55e',
   },
   muscleText: {
     color: '#ffffff',
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   finishButton: {
-    backgroundColor: '#c6ff00',
+    backgroundColor: '#22c55e',
     borderRadius: 30,
     paddingVertical: 18,
     alignItems: 'center',
