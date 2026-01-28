@@ -8,146 +8,134 @@ type MuscleGroup = {
   id: string;
   name: string;
   category: 'upper' | 'core' | 'lower';
+  side: 'front' | 'back' | 'both';
   bodyParts: Array<{ slug: string; intensity: number; side?: 'left' | 'right' }>;
 };
 
 const muscleGroups: MuscleGroup[] = [
-  // Upper Body
+  // Upper Body - Front
   {
     id: 'chest',
     name: 'Chest',
     category: 'upper',
+    side: 'front',
     bodyParts: [{ slug: 'chest', intensity: 2 }],
   },
   {
     id: 'shoulders',
     name: 'Shoulders',
     category: 'upper',
-    bodyParts: [
-      { slug: 'deltoids', intensity: 2, side: 'left' },
-      { slug: 'deltoids', intensity: 2, side: 'right' },
-    ],
-  },
-  {
-    id: 'trapezius',
-    name: 'Traps',
-    category: 'upper',
-    bodyParts: [
-      { slug: 'trapezius', intensity: 2, side: 'left' },
-      { slug: 'trapezius', intensity: 2, side: 'right' },
-    ],
+    side: 'front',
+    bodyParts: [{ slug: 'deltoids', intensity: 2 }],
   },
   {
     id: 'biceps',
     name: 'Biceps',
     category: 'upper',
-    bodyParts: [
-      { slug: 'biceps', intensity: 2, side: 'left' },
-      { slug: 'biceps', intensity: 2, side: 'right' },
-    ],
-  },
-  {
-    id: 'triceps',
-    name: 'Triceps',
-    category: 'upper',
-    bodyParts: [
-      { slug: 'triceps', intensity: 2, side: 'left' },
-      { slug: 'triceps', intensity: 2, side: 'right' },
-    ],
+    side: 'front',
+    bodyParts: [{ slug: 'biceps', intensity: 2 }],
   },
   {
     id: 'forearms',
     name: 'Forearms',
     category: 'upper',
-    bodyParts: [
-      { slug: 'forearm', intensity: 2, side: 'left' },
-      { slug: 'forearm', intensity: 2, side: 'right' },
-    ],
+    side: 'front',
+    bodyParts: [{ slug: 'forearm', intensity: 2 }],
+  },
+  // Upper Body - Both
+  {
+    id: 'trapezius',
+    name: 'Traps',
+    category: 'upper',
+    side: 'both',
+    bodyParts: [{ slug: 'trapezius', intensity: 2 }],
+  },
+  // Upper Body - Back
+  {
+    id: 'triceps',
+    name: 'Triceps',
+    category: 'upper',
+    side: 'back',
+    bodyParts: [{ slug: 'triceps', intensity: 2 }],
   },
   {
     id: 'upper-back',
     name: 'Upper Back',
     category: 'upper',
+    side: 'back',
     bodyParts: [{ slug: 'upper-back', intensity: 2 }],
   },
   {
     id: 'lower-back',
     name: 'Lower Back',
     category: 'upper',
+    side: 'back',
     bodyParts: [{ slug: 'lower-back', intensity: 2 }],
   },
-  // Core
+  // Core - Front
   {
     id: 'abs',
     name: 'Abs',
     category: 'core',
+    side: 'front',
     bodyParts: [{ slug: 'abs', intensity: 2 }],
   },
   {
     id: 'obliques',
     name: 'Obliques',
     category: 'core',
-    bodyParts: [
-      { slug: 'obliques', intensity: 2, side: 'left' },
-      { slug: 'obliques', intensity: 2, side: 'right' },
-    ],
+    side: 'front',
+    bodyParts: [{ slug: 'obliques', intensity: 2 }],
   },
   {
     id: 'neck',
     name: 'Neck',
     category: 'core',
+    side: 'front',
     bodyParts: [{ slug: 'neck', intensity: 2 }],
   },
-  // Lower Body
+  // Lower Body - Front
   {
     id: 'quadriceps',
     name: 'Quads',
     category: 'lower',
-    bodyParts: [
-      { slug: 'quadriceps', intensity: 2, side: 'left' },
-      { slug: 'quadriceps', intensity: 2, side: 'right' },
-    ],
-  },
-  {
-    id: 'hamstrings',
-    name: 'Hamstrings',
-    category: 'lower',
-    bodyParts: [
-      { slug: 'hamstring', intensity: 2, side: 'left' },
-      { slug: 'hamstring', intensity: 2, side: 'right' },
-    ],
-  },
-  {
-    id: 'glutes',
-    name: 'Glutes',
-    category: 'lower',
-    bodyParts: [
-      { slug: 'gluteal', intensity: 2, side: 'left' },
-      { slug: 'gluteal', intensity: 2, side: 'right' },
-    ],
-  },
-  {
-    id: 'calves',
-    name: 'Calves',
-    category: 'lower',
-    bodyParts: [
-      { slug: 'calves', intensity: 2, side: 'left' },
-      { slug: 'calves', intensity: 2, side: 'right' },
-    ],
+    side: 'front',
+    bodyParts: [{ slug: 'quadriceps', intensity: 2 }],
   },
   {
     id: 'adductors',
     name: 'Adductors',
     category: 'lower',
-    bodyParts: [
-      { slug: 'adductors', intensity: 2, side: 'left' },
-      { slug: 'adductors', intensity: 2, side: 'right' },
-    ],
+    side: 'front',
+    bodyParts: [{ slug: 'adductors', intensity: 2 }],
+  },
+  // Lower Body - Back
+  {
+    id: 'hamstrings',
+    name: 'Hamstrings',
+    category: 'lower',
+    side: 'back',
+    bodyParts: [{ slug: 'hamstring', intensity: 2 }],
+  },
+  {
+    id: 'glutes',
+    name: 'Glutes',
+    category: 'lower',
+    side: 'back',
+    bodyParts: [{ slug: 'gluteal', intensity: 2 }],
+  },
+  {
+    id: 'calves',
+    name: 'Calves',
+    category: 'lower',
+    side: 'both',
+    bodyParts: [{ slug: 'calves', intensity: 2 }],
   },
 ];
 
 export default function WorkoutScreen() {
   const [selectedMuscles, setSelectedMuscles] = useState<Set<string>>(new Set());
+  const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
 
   const toggleMuscle = (id: string) => {
     const newSelected = new Set(selectedMuscles);
@@ -167,6 +155,10 @@ export default function WorkoutScreen() {
     setSelectedMuscles(new Set());
   };
 
+  const toggleView = () => {
+    setViewSide((prev) => (prev === 'front' ? 'back' : 'front'));
+  };
+
   const getHighlightedParts = () => {
     const parts: Array<{ slug: string; intensity: number; side?: 'left' | 'right' }> = [];
     muscleGroups.forEach((group) => {
@@ -178,9 +170,9 @@ export default function WorkoutScreen() {
   };
 
   const groupedMuscles = {
-    upper: muscleGroups.filter((m) => m.category === 'upper'),
-    core: muscleGroups.filter((m) => m.category === 'core'),
-    lower: muscleGroups.filter((m) => m.category === 'lower'),
+    upper: muscleGroups.filter((m) => m.category === 'upper' && (m.side === viewSide || m.side === 'both')),
+    core: muscleGroups.filter((m) => m.category === 'core' && (m.side === viewSide || m.side === 'both')),
+    lower: muscleGroups.filter((m) => m.category === 'lower' && (m.side === viewSide || m.side === 'both')),
   };
 
   const renderMuscleButton = (muscle: MuscleGroup) => (
@@ -247,13 +239,25 @@ export default function WorkoutScreen() {
         </View>
 
         <View style={styles.rightPanel}>
-          <BodyView
-            data={getHighlightedParts()}
-            gender="male"
-            side="front"
-            scale={1.5}
-            colors={['#86efac', '#22c55e']}
-          />
+          <View style={styles.bodyViewContainer}>
+            <BodyView
+              data={getHighlightedParts()}
+              gender="male"
+              side={viewSide}
+              scale={1.5}
+              colors={['#86efac', '#22c55e']}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.rotateButton}
+            onPress={toggleView}
+            activeOpacity={0.7}>
+            <Text style={styles.rotateEmoji}>🔄</Text>
+            <Text style={styles.rotateText}>
+              {viewSide === 'front' ? 'Show Back' : 'Show Front'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -362,5 +366,42 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  bodyViewContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rotateButton: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderWidth: 1,
+    borderColor: '#22c55e',
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  rotateEmoji: {
+    fontSize: 20,
+  },
+  rotateText: {
+    color: '#22c55e',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
