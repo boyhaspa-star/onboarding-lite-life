@@ -1,4 +1,4 @@
-# for the second screen 
+# for the default screen 
 
 please refer to the assets/svg/ folder for the svg files
 
