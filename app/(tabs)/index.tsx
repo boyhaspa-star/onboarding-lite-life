@@ -38,7 +38,7 @@ const muscleGroups: MuscleGroup[] = [
   {
     id: 'chest',
     name: 'Chest',
-    bodyParts: [{ slug: 'chest', intensity: 100 }],
+    bodyParts: [{ slug: 'chest', intensity: 2 }],
   },
   {
     id: 'neck',
@@ -63,7 +63,7 @@ const muscleGroups: MuscleGroup[] = [
 ];
 
 export default function WorkoutScreen() {
-  const [selectedMuscles, setSelectedMuscles] = useState<Set<string>>(new Set(['shoulder']));
+  const [selectedMuscles, setSelectedMuscles] = useState<Set<string>>(new Set());
 
   const toggleMuscle = (id: string) => {
     const newSelected = new Set(selectedMuscles);
@@ -129,7 +129,7 @@ export default function WorkoutScreen() {
             gender="male"
             side="front"
             scale={1.5}
-            colors={['#22c55e']}
+            colors={['#86efac', '#22c55e']}
           />
         </View>
       </View>
