@@ -10,6 +10,7 @@ export default function RootLayout() {
     <>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="onboarding" options={{ animationEnabled: true }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="+not-found" />
       </Stack>

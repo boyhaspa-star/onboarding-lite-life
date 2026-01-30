@@ -9,7 +9,7 @@ export default function LandingScreen() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const handleGetStarted = () => {
-    router.push('/(tabs)');
+    router.push('/onboarding/gender');
   };
 
   return (
