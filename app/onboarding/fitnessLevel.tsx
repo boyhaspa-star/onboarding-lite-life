@@ -44,7 +44,7 @@ export default function FitnessLevelScreen() {
 
   const handleContinue = () => {
     if (selectedLevel) {
-      router.push('/onboarding/complete');
+      router.push('/onboarding/bodyParts');
     }
   };
 

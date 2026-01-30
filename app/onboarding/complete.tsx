@@ -47,7 +47,7 @@ export default function CompleteScreen() {
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: '100%' }]} />
             </View>
-            <Text style={styles.pageIndicator}>4 of 4</Text>
+            <Text style={styles.pageIndicator}>5 of 5</Text>
           </View>
 
           <View style={styles.celebrationSection}>

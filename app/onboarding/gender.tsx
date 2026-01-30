@@ -19,7 +19,7 @@ export default function GenderScreen() {
 
   const handleContinue = () => {
     if (selectedGender) {
-      router.push('/onboarding/birthday');
+      router.push('/onboarding/age');
     }
   };
 

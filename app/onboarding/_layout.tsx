@@ -8,8 +8,9 @@ export default function OnboardingLayout() {
         animationEnabled: true,
       }}>
       <Stack.Screen name="gender" />
-      <Stack.Screen name="birthday" />
+      <Stack.Screen name="age" />
       <Stack.Screen name="fitnessLevel" />
+      <Stack.Screen name="bodyParts" />
       <Stack.Screen name="complete" />
     </Stack>
   );
