@@ -1,17 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  Dimensions,
-  Image,
+  Animated,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Circle, CheckCircle2 } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
 type FitnessLevel = 'beginner' | 'intermediate' | 'advanced' | null;
 
@@ -19,129 +18,134 @@ const fitnessLevels = [
   {
     id: 'beginner',
     title: 'Beginner',
-    description: 'Just starting my fitness journey',
+    description: "I'm new to fitness",
   },
   {
     id: 'intermediate',
     title: 'Intermediate',
-    description: 'Have some workout experience',
+    description: 'I work out from time to time',
   },
   {
     id: 'advanced',
     title: 'Advanced',
-    description: 'Training regularly for years',
+    description: 'I exercise regularly',
   },
 ];
 
 export default function FitnessLevelScreen() {
   const [selectedLevel, setSelectedLevel] = useState<FitnessLevel>(null);
-  const { width } = Dimensions.get('window');
+  
+  // Animation refs for each card
+  const scaleAnims = useRef(
+    fitnessLevels.map(() => new Animated.Value(1))
+  ).current;
+
+  const handlePressIn = (index: number) => {
+    Animated.spring(scaleAnims[index], {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = (index: number) => {
+    Animated.spring(scaleAnims[index], {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handleSelect = (id: string, index: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedLevel(id as FitnessLevel);
+  };
 
   const handleContinue = () => {
     if (selectedLevel) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push('/onboarding/bodyParts');
     }
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <LinearGradient
-        colors={['#1a1a1a', '#000000']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '75%' }]} />
-            </View>
-            <Text style={styles.pageIndicator}>3 of 4</Text>
-          </View>
-
-          <View style={styles.heroSection}>
-            <View style={styles.heroImageWrapper}>
-              <Image
-                source={require('@/assets/images/icon.png')}
-                style={styles.heroImage}
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
-                style={styles.heroGradient}
-              />
-            </View>
-
-            <View style={styles.heroTextOverlay}>
-              <Text style={styles.heroMainText}>
-                <Text style={styles.highlightText}>Kick</Text>
-              </Text>
-              <Text style={styles.heroSecondaryText}>Boxing</Text>
-              <Text style={styles.heroSecondaryText}>
-                <Text style={styles.highlightText}>Weightlift</Text>
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.formSection}>
-            <Text style={styles.title}>What's your fitness level?</Text>
-            <Text style={styles.subtitle}>This helps us personalize your workout</Text>
-          </View>
-
-          <View style={styles.optionsContainer}>
-            {fitnessLevels.map((level) => {
-              const isSelected = selectedLevel === level.id;
-
-              return (
-                <TouchableOpacity
-                  key={level.id}
-                  onPress={() => setSelectedLevel(level.id as FitnessLevel)}
-                  activeOpacity={0.8}
-                  style={[
-                    styles.optionButton,
-                    isSelected && styles.optionButtonSelected,
-                  ]}>
-                  <View style={styles.radioContainer}>
-                    {isSelected ? (
-                      <CheckCircle2 size={24} color="#CDFC00" fill="#CDFC00" />
-                    ) : (
-                      <Circle size={24} color="#555555" strokeWidth={2} />
-                    )}
-                  </View>
-                  <View style={styles.optionTextContainer}>
-                    <Text
-                      style={[
-                        styles.optionTitle,
-                        isSelected && styles.optionTitleSelected,
-                      ]}>
-                      {level.title}
-                    </Text>
-                    <Text style={styles.optionDescription}>
-                      {level.description}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          <View style={styles.bottomSection}>
-            <TouchableOpacity
-              style={[
-                styles.continueButton,
-                !selectedLevel && styles.continueButtonDisabled,
-              ]}
-              onPress={handleContinue}
-              disabled={!selectedLevel}
-              activeOpacity={0.85}>
-              <Text style={styles.continueButtonText}>Continue</Text>
-              <ArrowRight
-                size={20}
-                color={selectedLevel ? '#000000' : '#666666'}
-              />
-            </TouchableOpacity>
+      <View style={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <ChevronLeft size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+          
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={styles.progressDot} />
           </View>
         </View>
-      </LinearGradient>
+
+        {/* Title */}
+        <View style={styles.titleSection}>
+          <Text style={styles.title}>What's your</Text>
+          <Text style={styles.titleAccent}>fitness level?</Text>
+        </View>
+
+        {/* Cards */}
+        <View style={styles.cardsContainer}>
+          {fitnessLevels.map((level, index) => {
+            const isSelected = selectedLevel === level.id;
+
+            return (
+              <Animated.View
+                key={level.id}
+                style={[
+                  { transform: [{ scale: scaleAnims[index] }] },
+                ]}
+              >
+                <Pressable
+                  onPressIn={() => handlePressIn(index)}
+                  onPressOut={() => handlePressOut(index)}
+                  onPress={() => handleSelect(level.id, index)}
+                  style={[
+                    styles.card,
+                    isSelected && styles.cardSelected,
+                  ]}
+                >
+                  <Text style={styles.cardTitle}>{level.title}</Text>
+                  <Text style={styles.cardDescription}>{level.description}</Text>
+                </Pressable>
+              </Animated.View>
+            );
+          })}
+        </View>
+
+        {/* Bottom Button */}
+        <View style={styles.bottomSection}>
+          <TouchableOpacity
+            style={[
+              styles.continueButton,
+              !selectedLevel && styles.continueButtonDisabled,
+            ]}
+            onPress={handleContinue}
+            disabled={!selectedLevel}
+            activeOpacity={0.85}
+          >
+            <Text style={[
+              styles.continueButtonText,
+              !selectedLevel && styles.continueButtonTextDisabled,
+            ]}>
+              Next
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -149,153 +153,109 @@ export default function FitnessLevelScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#0A0A0A',
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingVertical: 16,
-    justifyContent: 'space-between',
+    paddingTop: 8,
+    paddingBottom: 32,
   },
   header: {
-    marginBottom: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 40,
   },
-  progressBar: {
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  progressContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginRight: 44, // Balance the back button
+  },
+  progressDot: {
+    width: 32,
     height: 4,
-    backgroundColor: '#1a1a1a',
     borderRadius: 2,
-    marginBottom: 12,
-    overflow: 'hidden',
+    backgroundColor: '#333333',
   },
-  progressFill: {
-    height: '100%',
+  progressDotActive: {
     backgroundColor: '#CDFC00',
-    borderRadius: 2,
   },
-  pageIndicator: {
-    color: '#999999',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  formSection: {
-    marginBottom: 24,
-  },
-  heroSection: {
-    marginBottom: 28,
-    borderRadius: 20,
-    overflow: 'hidden',
-    height: 200,
-    position: 'relative',
-  },
-  heroImageWrapper: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  heroGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '70%',
-  },
-  heroTextOverlay: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-  },
-  heroMainText: {
-    fontSize: 48,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    lineHeight: 52,
-  },
-  heroSecondaryText: {
-    fontSize: 48,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    lineHeight: 52,
-  },
-  highlightText: {
-    color: '#CDFC00',
+  titleSection: {
+    alignItems: 'center',
+    marginBottom: 48,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  titleAccent: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#CDFC00',
+    textAlign: 'center',
+  },
+  cardsContainer: {
+    flex: 1,
+    gap: 16,
+  },
+  card: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 20,
+    padding: 24,
+    minHeight: 110,
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  cardSelected: {
+    borderColor: '#CDFC00',
+    backgroundColor: '#1A1A1A',
+    shadowColor: '#CDFC00',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#999999',
-  },
-  optionsContainer: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  optionButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 1.5,
-    borderColor: '#333333',
-    borderRadius: 16,
-    padding: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  optionButtonSelected: {
-    backgroundColor: 'rgba(205, 252, 0, 0.08)',
-    borderColor: '#CDFC00',
-  },
-  radioContainer: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  optionTextContainer: {
-    flex: 1,
-  },
-  optionTitle: {
+  cardDescription: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  optionTitleSelected: {
-    color: '#FFFFFF',
-  },
-  optionDescription: {
-    fontSize: 13,
     color: '#888888',
     fontWeight: '400',
   },
   bottomSection: {
-    gap: 12,
+    marginTop: 24,
   },
   continueButton: {
-    backgroundColor: '#E6FE58',
-    borderRadius: 100,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    backgroundColor: '#CDFC00',
+    borderRadius: 30,
+    paddingVertical: 18,
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
+    justifyContent: 'center',
   },
   continueButtonDisabled: {
-    backgroundColor: '#333333',
-    opacity: 0.5,
+    backgroundColor: '#2A2A2A',
   },
   continueButtonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: '#000000',
+  },
+  continueButtonTextDisabled: {
+    color: '#666666',
   },
 });
