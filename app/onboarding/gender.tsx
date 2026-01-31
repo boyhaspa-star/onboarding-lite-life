@@ -1,253 +1,322 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
-  Image,
+  Animated,
+  Pressable,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Circle, CheckCircle2 } from 'lucide-react-native';
+import { User, UserRound } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
-type Gender = 'male' | 'female' | 'other' | null;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+type Gender = 'male' | 'female' | null;
 
 export default function GenderScreen() {
   const [selectedGender, setSelectedGender] = useState<Gender>(null);
+  
+  // Animation refs
+  const maleScale = useRef(new Animated.Value(1)).current;
+  const femaleScale = useRef(new Animated.Value(1)).current;
+  const maleGlow = useRef(new Animated.Value(0)).current;
+  const femaleGlow = useRef(new Animated.Value(0)).current;
+
+  const handlePressIn = (gender: 'male' | 'female') => {
+    const scale = gender === 'male' ? maleScale : femaleScale;
+    Animated.spring(scale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = (gender: 'male' | 'female') => {
+    const scale = gender === 'male' ? maleScale : femaleScale;
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handleSelect = (gender: 'male' | 'female') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSelectedGender(gender);
+    
+    // Animate glow
+    const selectedGlow = gender === 'male' ? maleGlow : femaleGlow;
+    const otherGlow = gender === 'male' ? femaleGlow : maleGlow;
+    
+    Animated.parallel([
+      Animated.timing(selectedGlow, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(otherGlow, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
 
   const handleContinue = () => {
     if (selectedGender) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push('/onboarding/age');
     }
   };
 
-  const genderOptions = [
-    { id: 'male', label: 'Male' },
-    { id: 'female', label: 'Female' },
-  ];
+  const renderGenderCard = (
+    gender: 'male' | 'female',
+    label: string,
+    scale: Animated.Value,
+    glow: Animated.Value
+  ) => {
+    const isSelected = selectedGender === gender;
+    const IconComponent = gender === 'male' ? User : UserRound;
+
+    const borderColor = glow.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['#2A2A2A', '#CDFC00'],
+    });
+
+    const shadowOpacity = glow.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 0.5],
+    });
+
+    return (
+      <Animated.View
+        style={[
+          styles.cardWrapper,
+          {
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        <Pressable
+          onPressIn={() => handlePressIn(gender)}
+          onPressOut={() => handlePressOut(gender)}
+          onPress={() => handleSelect(gender)}
+          style={styles.cardPressable}
+        >
+          <Animated.View
+            style={[
+              styles.card,
+              {
+                borderColor,
+                shadowOpacity,
+              },
+            ]}
+          >
+            {/* Character silhouette area */}
+            <View style={styles.characterContainer}>
+              <View style={[
+                styles.characterCircle,
+                isSelected && styles.characterCircleSelected,
+              ]}>
+                <IconComponent
+                  size={80}
+                  color={isSelected ? '#CDFC00' : '#666666'}
+                  strokeWidth={1.5}
+                />
+              </View>
+            </View>
+            
+            {/* Label */}
+            <Text style={[
+              styles.cardLabel,
+              isSelected && styles.cardLabelSelected,
+            ]}>
+              {label}
+            </Text>
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <LinearGradient
-        colors={['#1a1a1a', '#000000']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '25%' }]} />
-            </View>
-            <Text style={styles.pageIndicator}>1 of 4</Text>
+      <View style={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={styles.progressDot} />
+            <View style={styles.progressDot} />
+            <View style={styles.progressDot} />
           </View>
+        </View>
 
-          <View style={styles.heroSection}>
-            <View style={styles.heroImageWrapper}>
-              <Image
-                source={require('@/assets/images/icon.png')}
-                style={styles.heroImage}
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
-                style={styles.heroGradient}
-              />
-            </View>
+        {/* Title */}
+        <View style={styles.titleSection}>
+          <Text style={styles.title}>What's your</Text>
+          <Text style={styles.titleAccent}>gender?</Text>
+        </View>
 
-            <View style={styles.heroTextOverlay}>
-              <Text style={styles.heroMainText}>
-                <Text style={styles.highlightText}>Kick</Text>
-              </Text>
-              <Text style={styles.heroSecondaryText}>Boxing</Text>
-              <Text style={styles.heroSecondaryText}>
-                <Text style={styles.highlightText}>Weightlift</Text>
-              </Text>
-            </View>
-          </View>
+        {/* Gender Cards */}
+        <View style={styles.cardsContainer}>
+          {renderGenderCard('male', 'Male', maleScale, maleGlow)}
+          {renderGenderCard('female', 'Female', femaleScale, femaleGlow)}
+        </View>
 
-          <View style={styles.formSection}>
-            <Text style={styles.title}>Choose your gender</Text>
+        {/* Tip text */}
+        <Text style={styles.tipText}>
+          This helps us personalize your workout experience
+        </Text>
 
-            <View style={styles.optionsContainer}>
-              {genderOptions.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[
-                    styles.optionButton,
-                    selectedGender === option.id && styles.optionButtonSelected,
-                  ]}
-                  onPress={() => setSelectedGender(option.id as Gender)}
-                  activeOpacity={0.8}>
-                  <View style={styles.radioContainer}>
-                    {selectedGender === option.id ? (
-                      <CheckCircle2 size={24} color="#CDFC00" fill="#CDFC00" />
-                    ) : (
-                      <Circle size={24} color="#555555" strokeWidth={2} />
-                    )}
-                  </View>
-                  <Text
-                    style={[
-                      styles.optionText,
-                      selectedGender === option.id && styles.optionTextSelected,
-                    ]}>
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
+        {/* Bottom Button */}
+        <View style={styles.bottomSection}>
           <TouchableOpacity
-            style={[styles.continueButton, !selectedGender && styles.continueButtonDisabled]}
+            style={[
+              styles.continueButton,
+              !selectedGender && styles.continueButtonDisabled,
+            ]}
             onPress={handleContinue}
             disabled={!selectedGender}
-            activeOpacity={0.85}>
-            <Text style={styles.continueButtonText}>Continue</Text>
-            <ArrowRight size={20} color={selectedGender ? '#000000' : '#666666'} />
+            activeOpacity={0.85}
+          >
+            <Text style={[
+              styles.continueButtonText,
+              !selectedGender && styles.continueButtonTextDisabled,
+            ]}>
+              Next
+            </Text>
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
     </SafeAreaView>
   );
 }
 
+const CARD_WIDTH = (SCREEN_WIDTH - 64) / 2;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#0A0A0A',
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingVertical: 16,
-    justifyContent: 'space-between',
+    paddingTop: 8,
+    paddingBottom: 32,
   },
   header: {
-    marginBottom: 32,
+    alignItems: 'center',
+    marginBottom: 48,
+    paddingTop: 8,
   },
-  progressBar: {
+  progressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  progressDot: {
+    width: 32,
     height: 4,
-    backgroundColor: '#1a1a1a',
     borderRadius: 2,
-    marginBottom: 12,
-    overflow: 'hidden',
+    backgroundColor: '#333333',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#22c55e',
-    borderRadius: 2,
+  progressDotActive: {
+    backgroundColor: '#CDFC00',
   },
-  pageIndicator: {
-    color: '#999999',
-    fontSize: 12,
-    fontWeight: '500',
+  titleSection: {
+    alignItems: 'center',
+    marginBottom: 48,
   },
-  heroSection: {
-    marginBottom: 40,
-    borderRadius: 24,
-    overflow: 'hidden',
-    height: 280,
-  },
-  heroImageWrapper: {
-    flex: 1,
-    position: 'relative',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  heroGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '100%',
-  },
-  heroTextOverlay: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    zIndex: 10,
-  },
-  heroMainText: {
-    fontSize: 48,
-    fontWeight: '800',
-    color: '#E6FE58',
-    lineHeight: 52,
-  },
-  heroSecondaryText: {
+  title: {
     fontSize: 32,
     fontWeight: '700',
     color: '#FFFFFF',
-    lineHeight: 36,
+    textAlign: 'center',
   },
-  highlightText: {
-    color: '#E6FE58',
+  titleAccent: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#CDFC00',
+    textAlign: 'center',
   },
-  formSection: {
+  cardsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
     marginBottom: 32,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 24,
+  cardWrapper: {
+    width: CARD_WIDTH,
   },
-  optionsContainer: {
-    gap: 12,
+  cardPressable: {
+    width: '100%',
   },
-  optionButton: {
-    flexDirection: 'row',
+  card: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 24,
+    padding: 24,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderWidth: 1,
-    borderColor: '#333333',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    gap: 16,
-    activeOpacity: 0.8,
+    borderWidth: 2,
+    shadowColor: '#CDFC00',
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 20,
+    elevation: 8,
   },
-  optionButtonSelected: {
-    backgroundColor: 'rgba(205, 252, 0, 0.08)',
-    borderColor: '#CDFC00',
+  characterContainer: {
+    marginBottom: 20,
   },
-  radioContainer: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
+  characterCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#252525',
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  optionText: {
-    flex: 1,
-    fontSize: 16,
+  characterCircleSelected: {
+    backgroundColor: 'rgba(205, 252, 0, 0.1)',
+  },
+  cardLabel: {
+    fontSize: 18,
     fontWeight: '600',
-    color: '#CCCCCC',
+    color: '#888888',
   },
-  optionTextSelected: {
+  cardLabelSelected: {
     color: '#FFFFFF',
-    fontWeight: '700',
+  },
+  tipText: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  bottomSection: {
+    marginTop: 'auto',
   },
   continueButton: {
-    backgroundColor: '#E6FE58',
-    borderRadius: 100,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    backgroundColor: '#CDFC00',
+    borderRadius: 30,
+    paddingVertical: 18,
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
+    justifyContent: 'center',
   },
   continueButtonDisabled: {
-    backgroundColor: '#333333',
-    opacity: 0.5,
+    backgroundColor: '#2A2A2A',
   },
   continueButtonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: '#000000',
+  },
+  continueButtonTextDisabled: {
+    color: '#666666',
   },
 });
