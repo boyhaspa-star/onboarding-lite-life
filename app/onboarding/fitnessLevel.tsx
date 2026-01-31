@@ -6,35 +6,30 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Zap, Activity, Target } from 'lucide-react-native';
+import { ArrowRight, Circle, CheckCircle2 } from 'lucide-react-native';
 
 type FitnessLevel = 'beginner' | 'intermediate' | 'advanced' | null;
 
 const fitnessLevels = [
   {
     id: 'beginner',
-    icon: Activity,
     title: 'Beginner',
     description: 'Just starting my fitness journey',
-    color: '#3B82F6',
   },
   {
     id: 'intermediate',
-    icon: Zap,
     title: 'Intermediate',
     description: 'Have some workout experience',
-    color: '#22c55e',
   },
   {
     id: 'advanced',
-    icon: Target,
     title: 'Advanced',
     description: 'Training regularly for years',
-    color: '#F59E0B',
   },
 ];
 
@@ -63,17 +58,37 @@ export default function FitnessLevelScreen() {
             <Text style={styles.pageIndicator}>3 of 4</Text>
           </View>
 
+          <View style={styles.heroSection}>
+            <View style={styles.heroImageWrapper}>
+              <Image
+                source={require('@/assets/images/icon.png')}
+                style={styles.heroImage}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
+                style={styles.heroGradient}
+              />
+            </View>
+
+            <View style={styles.heroTextOverlay}>
+              <Text style={styles.heroMainText}>
+                <Text style={styles.highlightText}>Kick</Text>
+              </Text>
+              <Text style={styles.heroSecondaryText}>Boxing</Text>
+              <Text style={styles.heroSecondaryText}>
+                <Text style={styles.highlightText}>Weightlift</Text>
+              </Text>
+            </View>
+          </View>
+
           <View style={styles.formSection}>
             <Text style={styles.title}>What's your fitness level?</Text>
             <Text style={styles.subtitle}>This helps us personalize your workout</Text>
           </View>
 
-          <ScrollView
-            style={styles.cardsContainer}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}>
+          <View style={styles.optionsContainer}>
             {fitnessLevels.map((level) => {
-              const IconComponent = level.icon;
               const isSelected = selectedLevel === level.id;
 
               return (
@@ -82,45 +97,32 @@ export default function FitnessLevelScreen() {
                   onPress={() => setSelectedLevel(level.id as FitnessLevel)}
                   activeOpacity={0.8}
                   style={[
-                    styles.card,
-                    isSelected && styles.cardSelected,
-                    {
-                      borderColor: isSelected ? level.color : '#333333',
-                      backgroundColor: isSelected
-                        ? `${level.color}15`
-                        : 'rgba(255, 255, 255, 0.03)',
-                    },
+                    styles.optionButton,
+                    isSelected && styles.optionButtonSelected,
                   ]}>
-                  <View style={styles.cardHeader}>
-                    <View
-                      style={[
-                        styles.iconContainer,
-                        { backgroundColor: `${level.color}20` },
-                      ]}>
-                      <IconComponent
-                        size={28}
-                        color={level.color}
-                        strokeWidth={2.5}
-                      />
-                    </View>
-                    <View style={styles.cardTitleContainer}>
-                      <Text style={styles.cardTitle}>{level.title}</Text>
-                      <Text style={styles.cardDescription}>
-                        {level.description}
-                      </Text>
-                    </View>
+                  <View style={styles.radioContainer}>
+                    {isSelected ? (
+                      <CheckCircle2 size={24} color="#CDFC00" fill="#CDFC00" />
+                    ) : (
+                      <Circle size={24} color="#555555" strokeWidth={2} />
+                    )}
                   </View>
-
-                  <View
-                    style={[
-                      styles.cardIndicator,
-                      isSelected && { backgroundColor: level.color },
-                    ]}
-                  />
+                  <View style={styles.optionTextContainer}>
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        isSelected && styles.optionTitleSelected,
+                      ]}>
+                      {level.title}
+                    </Text>
+                    <Text style={styles.optionDescription}>
+                      {level.description}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
-          </ScrollView>
+          </View>
 
           <View style={styles.bottomSection}>
             <TouchableOpacity
@@ -167,7 +169,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#22c55e',
+    backgroundColor: '#CDFC00',
     borderRadius: 2,
   },
   pageIndicator: {
@@ -177,6 +179,49 @@ const styles = StyleSheet.create({
   },
   formSection: {
     marginBottom: 24,
+  },
+  heroSection: {
+    marginBottom: 28,
+    borderRadius: 20,
+    overflow: 'hidden',
+    height: 200,
+    position: 'relative',
+  },
+  heroImageWrapper: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  heroGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '70%',
+  },
+  heroTextOverlay: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+  },
+  heroMainText: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    lineHeight: 52,
+  },
+  heroSecondaryText: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    lineHeight: 52,
+  },
+  highlightText: {
+    color: '#CDFC00',
   },
   title: {
     fontSize: 28,
@@ -189,62 +234,46 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#999999',
   },
-  cardsContainer: {
-    flex: 1,
+  optionsContainer: {
+    gap: 12,
     marginBottom: 20,
   },
-  card: {
+  optionButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderWidth: 1.5,
+    borderColor: '#333333',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  cardSelected: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-  cardHeader: {
-    flex: 1,
+    padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+  optionButtonSelected: {
+    backgroundColor: 'rgba(205, 252, 0, 0.08)',
+    borderColor: '#CDFC00',
+  },
+  radioContainer: {
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cardTitleContainer: {
+  optionTextContainer: {
     flex: 1,
   },
-  cardTitle: {
+  optionTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
     marginBottom: 4,
   },
-  cardDescription: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#999999',
+  optionTitleSelected: {
+    color: '#FFFFFF',
   },
-  cardIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#333333',
-    marginLeft: 12,
+  optionDescription: {
+    fontSize: 13,
+    color: '#888888',
+    fontWeight: '400',
   },
   bottomSection: {
     gap: 12,

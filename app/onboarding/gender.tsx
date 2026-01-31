@@ -26,7 +26,6 @@ export default function GenderScreen() {
   const genderOptions = [
     { id: 'male', label: 'Male' },
     { id: 'female', label: 'Female' },
-    { id: 'other', label: 'Not Define' },
   ];
 
   return (
@@ -83,7 +82,7 @@ export default function GenderScreen() {
                   activeOpacity={0.8}>
                   <View style={styles.radioContainer}>
                     {selectedGender === option.id ? (
-                      <CheckCircle2 size={24} color="#22c55e" fill="#22c55e" />
+                      <CheckCircle2 size={24} color="#CDFC00" fill="#CDFC00" />
                     ) : (
                       <Circle size={24} color="#555555" strokeWidth={2} />
                     )}
@@ -212,8 +211,8 @@ const styles = StyleSheet.create({
     activeOpacity: 0.8,
   },
   optionButtonSelected: {
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-    borderColor: '#22c55e',
+    backgroundColor: 'rgba(205, 252, 0, 0.08)',
+    borderColor: '#CDFC00',
   },
   radioContainer: {
     width: 32,
