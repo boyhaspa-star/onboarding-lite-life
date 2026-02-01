@@ -1,265 +1,160 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BodyView from 'react-native-body-highlighter';
-import { Check } from 'lucide-react-native';
+import { Search, Bell, Play } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
-type MuscleGroup = {
-  id: string;
-  name: string;
-  category: 'upper' | 'core' | 'lower';
-  side: 'front' | 'back' | 'both';
-  bodyParts: Array<{ slug: string; intensity: number; side?: 'left' | 'right' }>;
-};
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const muscleGroups: MuscleGroup[] = [
-  // Upper Body - Front
-  {
-    id: 'chest',
-    name: 'Chest',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'chest', intensity: 2 }],
-  },
-  {
-    id: 'shoulders',
-    name: 'Shoulders',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'deltoids', intensity: 2 }],
-  },
-  {
-    id: 'biceps',
-    name: 'Biceps',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'biceps', intensity: 2 }],
-  },
-  {
-    id: 'forearms',
-    name: 'Forearms',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'forearm', intensity: 2 }],
-  },
-  // Upper Body - Both
-  {
-    id: 'trapezius',
-    name: 'Traps',
-    category: 'upper',
-    side: 'both',
-    bodyParts: [{ slug: 'trapezius', intensity: 2 }],
-  },
-  // Upper Body - Back
-  {
-    id: 'triceps',
-    name: 'Triceps',
-    category: 'upper',
-    side: 'back',
-    bodyParts: [{ slug: 'triceps', intensity: 2 }],
-  },
-  {
-    id: 'upper-back',
-    name: 'Upper Back',
-    category: 'upper',
-    side: 'back',
-    bodyParts: [{ slug: 'upper-back', intensity: 2 }],
-  },
-  {
-    id: 'lower-back',
-    name: 'Lower Back',
-    category: 'upper',
-    side: 'back',
-    bodyParts: [{ slug: 'lower-back', intensity: 2 }],
-  },
-  // Core - Front
-  {
-    id: 'abs',
-    name: 'Abs',
-    category: 'core',
-    side: 'front',
-    bodyParts: [{ slug: 'abs', intensity: 2 }],
-  },
-  {
-    id: 'obliques',
-    name: 'Obliques',
-    category: 'core',
-    side: 'front',
-    bodyParts: [{ slug: 'obliques', intensity: 2 }],
-  },
-  {
-    id: 'neck',
-    name: 'Neck',
-    category: 'core',
-    side: 'front',
-    bodyParts: [{ slug: 'neck', intensity: 2 }],
-  },
-  // Lower Body - Front
-  {
-    id: 'quadriceps',
-    name: 'Quads',
-    category: 'lower',
-    side: 'front',
-    bodyParts: [{ slug: 'quadriceps', intensity: 2 }],
-  },
-  {
-    id: 'adductors',
-    name: 'Adductors',
-    category: 'lower',
-    side: 'front',
-    bodyParts: [{ slug: 'adductors', intensity: 2 }],
-  },
-  // Lower Body - Back
-  {
-    id: 'hamstrings',
-    name: 'Hamstrings',
-    category: 'lower',
-    side: 'back',
-    bodyParts: [{ slug: 'hamstring', intensity: 2 }],
-  },
-  {
-    id: 'glutes',
-    name: 'Glutes',
-    category: 'lower',
-    side: 'back',
-    bodyParts: [{ slug: 'gluteal', intensity: 2 }],
-  },
-  {
-    id: 'calves',
-    name: 'Calves',
-    category: 'lower',
-    side: 'both',
-    bodyParts: [{ slug: 'calves', intensity: 2 }],
-  },
+const days = [
+  { id: 'sun', label: 'Sun', date: '01', isActive: false },
+  { id: 'mon', label: 'Mon', date: '02', isActive: false },
+  { id: 'tue', label: 'Tue', date: '03', isActive: false },
+  { id: 'wed', label: 'Wed', date: '04', isActive: true },
+  { id: 'thu', label: 'Thu', date: '05', isActive: false },
+  { id: 'fri', label: 'Fri', date: '06', isActive: false },
+  { id: 'sat', label: 'Sat', date: '07', isActive: false },
 ];
 
-export default function WorkoutScreen() {
-  const [selectedMuscles, setSelectedMuscles] = useState<Set<string>>(new Set());
-  const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
-
-  const toggleMuscle = (id: string) => {
-    const newSelected = new Set(selectedMuscles);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedMuscles(newSelected);
-  };
-
-  const selectAll = () => {
-    setSelectedMuscles(new Set(muscleGroups.map((g) => g.id)));
-  };
-
-  const deselectAll = () => {
-    setSelectedMuscles(new Set());
-  };
-
-  const toggleView = () => {
-    setViewSide((prev) => (prev === 'front' ? 'back' : 'front'));
-  };
-
-  const getHighlightedParts = () => {
-    const parts: Array<{ slug: string; intensity: number; side?: 'left' | 'right' }> = [];
-    muscleGroups.forEach((group) => {
-      if (selectedMuscles.has(group.id)) {
-        parts.push(...group.bodyParts);
-      }
-    });
-    return parts;
-  };
-
-  const groupedMuscles = {
-    upper: muscleGroups.filter((m) => m.category === 'upper' && (m.side === viewSide || m.side === 'both')),
-    core: muscleGroups.filter((m) => m.category === 'core' && (m.side === viewSide || m.side === 'both')),
-    lower: muscleGroups.filter((m) => m.category === 'lower' && (m.side === viewSide || m.side === 'both')),
-  };
-
-  const renderMuscleButton = (muscle: MuscleGroup) => (
-    <TouchableOpacity
-      key={muscle.id}
-      style={[
-        styles.muscleButton,
-        selectedMuscles.has(muscle.id) && styles.muscleButtonSelected,
-      ]}
-      onPress={() => toggleMuscle(muscle.id)}
-      activeOpacity={0.7}>
-      <View
-        style={[
-          styles.checkbox,
-          selectedMuscles.has(muscle.id) && styles.checkboxSelected,
-        ]}>
-        {selectedMuscles.has(muscle.id) && (
-          <Check size={14} color="#000000" strokeWidth={3} />
-        )}
-      </View>
-      <Text
-        style={[
-          styles.muscleText,
-          selectedMuscles.has(muscle.id) && styles.muscleTextSelected,
-        ]}>
-        {muscle.name}
-      </Text>
-    </TouchableOpacity>
-  );
+export default function HomeScreen() {
+  const [selectedDay, setSelectedDay] = useState('wed');
+  const exerciseCount = 12;
+  const completedExercises = 3;
+  const completionPercentage = Math.round((completedExercises / exerciseCount) * 100);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.content}>
-        <View style={styles.leftPanel}>
-          <View style={styles.headerActions}>
-            <TouchableOpacity onPress={selectAll} style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Select All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={deselectAll} style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Clear</Text>
-            </TouchableOpacity>
+      <LinearGradient
+        colors={['#0A0A0A', '#000000']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.container}>
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}>
+          <View style={styles.header}>
+            <View style={styles.weatherSection}>
+              <Text style={styles.temperature}>18°</Text>
+              <View>
+                <Text style={styles.weatherStatus}>Partly Cloudy</Text>
+                <Text style={styles.location}>San Diego, California</Text>
+              </View>
+            </View>
+
+            <View style={styles.headerActions}>
+              <TouchableOpacity style={styles.iconButton}>
+                <Search size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconButton}>
+                <Bell size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <ScrollView style={styles.muscleList} showsVerticalScrollIndicator={false}>
-            <View style={styles.categorySection}>
-              <Text style={styles.categoryTitle}>UPPER BODY</Text>
-              {groupedMuscles.upper.map(renderMuscleButton)}
+          <View style={styles.weekSection}>
+            <Text style={styles.sectionTitle}>This Week</Text>
+            <View style={styles.weekContainer}>
+              {days.map((day) => {
+                const isSelected = selectedDay === day.id;
+                return (
+                  <TouchableOpacity
+                    key={day.id}
+                    onPress={() => setSelectedDay(day.id)}
+                    activeOpacity={0.8}
+                    style={[
+                      styles.dayColumn,
+                      isSelected && styles.dayColumnActive,
+                    ]}>
+                    <Text
+                      style={[
+                        styles.dayLabel,
+                        isSelected && styles.dayLabelActive,
+                      ]}>
+                      {day.label}
+                    </Text>
+                    <View
+                      style={[
+                        styles.dateBox,
+                        isSelected && styles.dateBoxActive,
+                      ]}>
+                      <Text
+                        style={[
+                          styles.dateNumber,
+                          isSelected && styles.dateNumberActive,
+                        ]}>
+                        {day.date}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-
-            <View style={styles.categorySection}>
-              <Text style={styles.categoryTitle}>CORE</Text>
-              {groupedMuscles.core.map(renderMuscleButton)}
-            </View>
-
-            <View style={styles.categorySection}>
-              <Text style={styles.categoryTitle}>LOWER BODY</Text>
-              {groupedMuscles.lower.map(renderMuscleButton)}
-            </View>
-          </ScrollView>
-
-          <TouchableOpacity style={styles.finishButton}>
-            <Text style={styles.finishButtonText}>Finished</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.rightPanel}>
-          <View style={styles.bodyViewContainer}>
-            <BodyView
-              data={getHighlightedParts()}
-              gender="male"
-              side={viewSide}
-              scale={1.5}
-              colors={['#86efac', '#22c55e']}
-            />
           </View>
 
-          <TouchableOpacity
-            style={styles.rotateButton}
-            onPress={toggleView}
-            activeOpacity={0.7}>
-            <Text style={styles.rotateEmoji}>🔄</Text>
-            <Text style={styles.rotateText}>
-              {viewSide === 'front' ? 'Show Back' : 'Show Front'}
-            </Text>
+          <View style={styles.goalsSection}>
+            <View style={styles.goalsHeader}>
+              <View>
+                <Text style={styles.goalsTitle}>Daily Goals</Text>
+                <Text style={styles.goalsSubtitle}>
+                  {exerciseCount} Excersie Left
+                </Text>
+              </View>
+              <View style={styles.progressCircle}>
+                <svg
+                  width="80"
+                  height="80"
+                  viewBox="0 0 80 80"
+                  style={styles.svg}>
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="35"
+                    fill="#373E16"
+                    strokeWidth="0"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="35"
+                    fill="none"
+                    stroke="#CDFC00"
+                    strokeWidth="6"
+                    strokeDasharray={`${88 * (completionPercentage / 100)} 220`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 40 40)"
+                  />
+                  <text
+                    x="40"
+                    y="45"
+                    textAnchor="middle"
+                    fontSize="18"
+                    fontWeight="500"
+                    fill="#FFFFFF">
+                    {completionPercentage}%
+                  </text>
+                </svg>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.workoutCard}>
+            <View style={styles.workoutContent}>
+              <View style={styles.workoutInfo}>
+                <Text style={styles.workoutTitle}>Ready to Start?</Text>
+                <Text style={styles.workoutDesc}>
+                  Begin your personalized workout
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.startButton} activeOpacity={0.85}>
+            <Text style={styles.startButtonText}>Start Workout</Text>
+            <Play size={20} color="#000000" fill="#000000" />
           </TouchableOpacity>
-        </View>
-      </View>
+        </ScrollView>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -267,141 +162,174 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#0A0A0A',
   },
-  content: {
+  scrollView: {
     flex: 1,
+    paddingHorizontal: 20,
+  },
+  header: {
     flexDirection: 'row',
-    padding: 20,
-    gap: 16,
-  },
-  leftPanel: {
-    flex: 1,
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginTop: 16,
+    marginBottom: 32,
+  },
+  weatherSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  temperature: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  weatherStatus: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  location: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#999999',
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
+    gap: 12,
   },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#333333',
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  muscleList: {
-    flex: 1,
-  },
-  categorySection: {
-    marginBottom: 20,
-  },
-  categoryTitle: {
-    color: '#666666',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  muscleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#2a2a2a',
-    borderRadius: 24,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-  },
-  muscleButtonSelected: {
-    borderColor: '#22c55e',
-    backgroundColor: 'rgba(34, 197, 94, 0.12)',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#555555',
-    marginRight: 10,
-    alignItems: 'center',
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: '#22c55e',
-    borderColor: '#22c55e',
-  },
-  muscleText: {
-    color: '#cccccc',
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  muscleTextSelected: {
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  finishButton: {
-    backgroundColor: '#22c55e',
-    borderRadius: 30,
-    paddingVertical: 18,
     alignItems: 'center',
-    marginTop: 20,
   },
-  finishButtonText: {
-    color: '#000000',
+  weekSection: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 16,
   },
-  rightPanel: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  bodyViewContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rotateButton: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    zIndex: 10,
+  weekContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(34, 197, 94, 0.15)',
-    borderWidth: 1,
-    borderColor: '#22c55e',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  rotateEmoji: {
-    fontSize: 20,
+  dayColumn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    backgroundColor: '#333333',
+    borderRadius: 16,
   },
-  rotateText: {
-    color: '#22c55e',
-    fontSize: 15,
+  dayColumnActive: {
+    backgroundColor: '#CDFC00',
+  },
+  dayLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+  dayLabelActive: {
+    color: '#000000',
+  },
+  dateBox: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#1F1F1F',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateBoxActive: {
+    backgroundColor: '#000000',
+  },
+  dateNumber: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#C3C3C3',
+  },
+  dateNumberActive: {
+    color: '#FFFFFF',
+  },
+  goalsSection: {
+    backgroundColor: '#191919',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+  },
+  goalsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  goalsTitle: {
+    fontSize: 18,
     fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  goalsSubtitle: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.4)',
+  },
+  progressCircle: {
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  svg: {
+    width: 80,
+    height: 80,
+  },
+  workoutCard: {
+    backgroundColor: '#191919',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    minHeight: 120,
+    justifyContent: 'center',
+  },
+  workoutContent: {
+    justifyContent: 'center',
+  },
+  workoutInfo: {
+    gap: 8,
+  },
+  workoutTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#CDFC00',
+  },
+  workoutDesc: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  startButton: {
+    backgroundColor: '#CDFC00',
+    borderRadius: 30,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 32,
+  },
+  startButtonText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000000',
   },
 });

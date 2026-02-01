@@ -164,7 +164,7 @@ export default function BodyPartsScreen() {
 
   const handleContinue = () => {
     if (selectedMuscles.size > 0) {
-      router.push('/onboarding/complete');
+      router.push('/onboarding/week');
     }
   };
 
@@ -207,7 +207,7 @@ export default function BodyPartsScreen() {
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: '80%' }]} />
           </View>
-          <Text style={styles.pageIndicator}>4 of 5</Text>
+          <Text style={styles.pageIndicator}>4 of 6</Text>
         </View>
 
         <View style={styles.titleSection}>
