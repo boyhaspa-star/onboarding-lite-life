@@ -1,160 +1,166 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Bell, Play } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { ChevronRight, Search, Bell } from 'lucide-react-native';
+import Svg, { Circle, Text as SvgText, Path } from 'react-native-svg';
+import StackIcon from '@/components/icons/StackIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const days = [
-  { id: 'sun', label: 'Sun', date: '01', isActive: false },
-  { id: 'mon', label: 'Mon', date: '02', isActive: false },
-  { id: 'tue', label: 'Tue', date: '03', isActive: false },
-  { id: 'wed', label: 'Wed', date: '04', isActive: true },
-  { id: 'thu', label: 'Thu', date: '05', isActive: false },
-  { id: 'fri', label: 'Fri', date: '06', isActive: false },
-  { id: 'sat', label: 'Sat', date: '07', isActive: false },
+  { id: 'sun', label: 'Sun', date: '01' },
+  { id: 'mon', label: 'Mon', date: '02' },
+  { id: 'tue', label: 'Tue', date: '03' },
+  { id: 'wed', label: 'Wed', date: '04' },
+  { id: 'thu', label: 'Thu', date: '05' },
+  { id: 'fri', label: 'Fri', date: '06' },
 ];
 
 export default function HomeScreen() {
-  const [selectedDay, setSelectedDay] = useState('wed');
+  const [selectedDay, setSelectedDay] = useState('sun');
   const exerciseCount = 12;
   const completedExercises = 3;
   const completionPercentage = Math.round((completedExercises / exerciseCount) * 100);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <LinearGradient
-        colors={['#0A0A0A', '#000000']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.container}>
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          scrollEventThrottle={16}>
-          <View style={styles.header}>
-            <View style={styles.weatherSection}>
-              <Text style={styles.temperature}>18°</Text>
-              <View>
-                <Text style={styles.weatherStatus}>Partly Cloudy</Text>
-                <Text style={styles.location}>San Diego, California</Text>
-              </View>
-            </View>
-
-            <View style={styles.headerActions}>
-              <TouchableOpacity style={styles.iconButton}>
-                <Search size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton}>
-                <Bell size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}>
+        
+        {/* Header with Weather and Actions */}
+        <View style={styles.header}>
+          <View style={styles.weatherSection}>
+            <Text style={styles.temperature}>18° Partly Cloudly</Text>
+            <Text style={styles.location}>San Diego, California</Text>
           </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.iconButton}>
+              <Search size={22} color="#FFFFFF" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Bell size={22} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-          <View style={styles.weekSection}>
-            <Text style={styles.sectionTitle}>This Week</Text>
-            <View style={styles.weekContainer}>
-              {days.map((day) => {
-                const isSelected = selectedDay === day.id;
-                return (
-                  <TouchableOpacity
-                    key={day.id}
-                    onPress={() => setSelectedDay(day.id)}
-                    activeOpacity={0.8}
+        {/* Week Calendar */}
+        <View style={styles.weekContainer}>
+          {days.map((day) => {
+            const isSelected = selectedDay === day.id;
+            return (
+              <TouchableOpacity
+                key={day.id}
+                onPress={() => setSelectedDay(day.id)}
+                activeOpacity={0.8}
+                style={[
+                  styles.dayColumn,
+                  isSelected && styles.dayColumnActive,
+                ]}>
+                <Text
+                  style={[
+                    styles.dayLabel,
+                    isSelected && styles.dayLabelActive,
+                  ]}>
+                  {day.label}
+                </Text>
+                <View
+                  style={[
+                    styles.dateBox,
+                    isSelected && styles.dateBoxActive,
+                  ]}>
+                  <Text
                     style={[
-                      styles.dayColumn,
-                      isSelected && styles.dayColumnActive,
+                      styles.dateNumber,
+                      isSelected && styles.dateNumberActive,
                     ]}>
-                    <Text
-                      style={[
-                        styles.dayLabel,
-                        isSelected && styles.dayLabelActive,
-                      ]}>
-                      {day.label}
-                    </Text>
-                    <View
-                      style={[
-                        styles.dateBox,
-                        isSelected && styles.dateBoxActive,
-                      ]}>
-                      <Text
-                        style={[
-                          styles.dateNumber,
-                          isSelected && styles.dateNumberActive,
-                        ]}>
-                        {day.date}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+                    {day.date}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Daily Goals Card */}
+        <View style={styles.dailyGoalsCard}>
+          <View style={styles.dailyGoalsContent}>
+            <View style={styles.stackIconContainer}>
+              <StackIcon width={23} height={36} />
+            </View>
+            <View style={styles.dailyGoalsText}>
+              <Text style={styles.dailyGoalsTitle}>Daily Goals</Text>
+              <Text style={styles.dailyGoalsSubtitle}>
+                {exerciseCount} Exercise left
+              </Text>
+            </View>
+            <View style={styles.progressCircle}>
+              <Svg width={60} height={60} viewBox="0 0 60 60">
+                <Circle
+                  cx="30"
+                  cy="30"
+                  r="25"
+                  fill="none"
+                  stroke="#373E16"
+                  strokeWidth="5"
+                />
+                <Circle
+                  cx="30"
+                  cy="30"
+                  r="25"
+                  fill="none"
+                  stroke="#CDFC00"
+                  strokeWidth="5"
+                  strokeDasharray={`${157 * (completionPercentage / 100)} 157`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 30 30)"
+                />
+                <SvgText
+                  x="30"
+                  y="34"
+                  textAnchor="middle"
+                  fontSize="14"
+                  fontWeight="600"
+                  fill="#FFFFFF">
+                  {completionPercentage}%
+                </SvgText>
+              </Svg>
             </View>
           </View>
-
-          <View style={styles.goalsSection}>
-            <View style={styles.goalsHeader}>
-              <View>
-                <Text style={styles.goalsTitle}>Daily Goals</Text>
-                <Text style={styles.goalsSubtitle}>
-                  {exerciseCount} Excersie Left
-                </Text>
-              </View>
-              <View style={styles.progressCircle}>
-                <svg
-                  width="80"
-                  height="80"
-                  viewBox="0 0 80 80"
-                  style={styles.svg}>
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="35"
-                    fill="#373E16"
-                    strokeWidth="0"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="35"
-                    fill="none"
-                    stroke="#CDFC00"
-                    strokeWidth="6"
-                    strokeDasharray={`${88 * (completionPercentage / 100)} 220`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 40 40)"
-                  />
-                  <text
-                    x="40"
-                    y="45"
-                    textAnchor="middle"
-                    fontSize="18"
-                    fontWeight="500"
-                    fill="#FFFFFF">
-                    {completionPercentage}%
-                  </text>
-                </svg>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.workoutCard}>
-            <View style={styles.workoutContent}>
-              <View style={styles.workoutInfo}>
-                <Text style={styles.workoutTitle}>Ready to Start?</Text>
-                <Text style={styles.workoutDesc}>
-                  Begin your personalized workout
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.startButton} activeOpacity={0.85}>
-            <Text style={styles.startButtonText}>Start Workout</Text>
-            <Play size={20} color="#000000" fill="#000000" />
+          
+          {/* Start Workout Button */}
+          <TouchableOpacity style={styles.startWorkoutButton} activeOpacity={0.85}>
+            <Text style={styles.startWorkoutText}>Start Workout</Text>
+            <Svg width={16} height={16} viewBox="0 0 24 24">
+              <Path
+                d="M8 5v14l11-7z"
+                fill="#000000"
+              />
+            </Svg>
           </TouchableOpacity>
-        </ScrollView>
-      </LinearGradient>
+        </View>
+
+        {/* Daily Goal Section */}
+        <Text style={styles.sectionTitle}>Daily Goal</Text>
+        
+        {/* Goal Card 1 */}
+        <View style={styles.goalCard}>
+          <View style={styles.goalCardPlaceholder} />
+          <View style={styles.goalCardFooter}>
+            <Text style={styles.goalCardText}>Do 5 exercises today</Text>
+            <TouchableOpacity style={styles.goalCardButton}>
+              <ChevronRight size={20} color="#000000" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Goal Card 2 */}
+        <View style={styles.goalCard}>
+          <View style={styles.goalCardPlaceholder} />
+        </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -166,33 +172,29 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginTop: 16,
-    marginBottom: 32,
+    marginTop: 8,
+    marginBottom: 20,
   },
   weatherSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    flex: 1,
   },
   temperature: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  weatherStatus: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
     color: '#FFFFFF',
+    marginBottom: 4,
   },
   location: {
-    fontSize: 12,
-    fontWeight: '400',
+    fontSize: 14,
     color: '#999999',
   },
   headerActions: {
@@ -207,19 +209,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  weekSection: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 16,
-  },
   weekContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
+    marginBottom: 20,
   },
   dayColumn: {
     flex: 1,
@@ -227,7 +221,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 4,
     backgroundColor: '#333333',
-    borderRadius: 16,
+    borderRadius: 24,
   },
   dayColumnActive: {
     backgroundColor: '#CDFC00',
@@ -242,10 +236,10 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   dateBox: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     backgroundColor: '#1F1F1F',
-    borderRadius: 20,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -254,69 +248,46 @@ const styles = StyleSheet.create({
   },
   dateNumber: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#C3C3C3',
   },
   dateNumberActive: {
     color: '#FFFFFF',
   },
-  goalsSection: {
-    backgroundColor: '#191919',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
+  dailyGoalsCard: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 24,
   },
-  goalsHeader: {
+  dailyGoalsContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  goalsTitle: {
+  stackIconContainer: {
+    marginRight: 12,
+  },
+  dailyGoalsText: {
+    flex: 1,
+  },
+  dailyGoalsTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 4,
   },
-  goalsSubtitle: {
+  dailyGoalsSubtitle: {
     fontSize: 12,
-    fontWeight: '400',
     color: 'rgba(255, 255, 255, 0.4)',
   },
   progressCircle: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  svg: {
-    width: 80,
-    height: 80,
-  },
-  workoutCard: {
-    backgroundColor: '#191919',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
-    minHeight: 120,
-    justifyContent: 'center',
-  },
-  workoutContent: {
-    justifyContent: 'center',
-  },
-  workoutInfo: {
-    gap: 8,
-  },
-  workoutTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#CDFC00',
-  },
-  workoutDesc: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.6)',
-  },
-  startButton: {
+  startWorkoutButton: {
     backgroundColor: '#CDFC00',
     borderRadius: 30,
     paddingVertical: 16,
@@ -325,11 +296,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 32,
   },
-  startButtonText: {
-    fontSize: 18,
+  startWorkoutText: {
+    fontSize: 16,
     fontWeight: '700',
     color: '#000000',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  goalCard: {
+    backgroundColor: '#D9D9D9',
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  goalCardPlaceholder: {
+    height: 140,
+    backgroundColor: '#D9D9D9',
+  },
+  goalCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  goalCardText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333333',
+  },
+  goalCardButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#CDFC00',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

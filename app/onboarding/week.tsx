@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -29,7 +30,7 @@ export default function WeekScreen() {
   const handleContinue = () => {
     if (selectedDays.length > 0) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push('/onboarding/complete');
+      router.replace('/(tabs)');
     }
   };
 
