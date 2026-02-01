@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 type FitnessLevel = 'beginner' | 'intermediate' | 'advanced' | null;
@@ -77,18 +76,12 @@ export default function FitnessLevelScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <ChevronLeft size={28} color="#FFFFFF" />
-          </TouchableOpacity>
-          
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={styles.progressDot} />
-          </View>
+        {/* Progress dots */}
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={styles.progressDot} />
         </View>
 
         {/* Title */}
@@ -153,31 +146,19 @@ export default function FitnessLevelScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#1A1A1A',
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingTop: 16,
     paddingBottom: 32,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
   progressContainer: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
-    marginRight: 44, // Balance the back button
+    marginBottom: 40,
   },
   progressDot: {
     width: 32,
@@ -189,71 +170,64 @@ const styles = StyleSheet.create({
     backgroundColor: '#CDFC00',
   },
   titleSection: {
-    alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontFamily: 'Audiowide',
     color: '#FFFFFF',
-    textAlign: 'center',
   },
   titleAccent: {
     fontSize: 32,
-    fontWeight: '700',
-    color: '#CDFC00',
-    textAlign: 'center',
+    fontFamily: 'Audiowide',
+    color: '#FF6B35',
   },
   cardsContainer: {
     flex: 1,
     gap: 16,
   },
   card: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(60, 60, 60, 0.5)',
     borderRadius: 20,
     padding: 24,
     minHeight: 110,
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   cardSelected: {
     borderColor: '#CDFC00',
-    backgroundColor: '#1A1A1A',
-    shadowColor: '#CDFC00',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    borderWidth: 2,
+    backgroundColor: 'rgba(205, 252, 0, 0.05)',
   },
   cardTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontFamily: 'Averta-Bold',
     color: '#FFFFFF',
     marginBottom: 8,
   },
   cardDescription: {
-    fontSize: 16,
-    color: '#888888',
-    fontWeight: '400',
+    fontSize: 14,
+    fontFamily: 'Averta',
+    color: 'rgba(255, 255, 255, 0.6)',
   },
   bottomSection: {
     marginTop: 24,
   },
   continueButton: {
-    backgroundColor: '#CDFC00',
+    backgroundColor: '#FF6B35',
     borderRadius: 30,
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   continueButtonDisabled: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#3A3A3A',
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
+    fontSize: 16,
+    fontFamily: 'Averta-Bold',
+    color: '#FFFFFF',
   },
   continueButtonTextDisabled: {
     color: '#666666',

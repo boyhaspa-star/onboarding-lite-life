@@ -1,71 +1,80 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Animated,
-  Pressable,
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { User, UserRound } from 'lucide-react-native';
+import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type Gender = 'male' | 'female' | null;
 
+// Male icon component
+const MaleIcon = ({ color = '#FFFFFF', size = 48 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M10 9C10 10.0609 9.57857 11.0783 8.82843 11.8284C8.07828 12.5786 7.06087 13 6 13C4.93913 13 3.92172 12.5786 3.17157 11.8284C2.42143 11.0783 2 10.0609 2 9C2 7.93913 2.42143 6.92172 3.17157 6.17157C3.92172 5.42143 4.93913 5 6 5C7.06087 5 8.07828 5.42143 8.82843 6.17157C9.57857 6.92172 10 7.93913 10 9Z"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M9 13L15 7"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M12 7H15V10"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
+// Female icon component
+const FemaleIcon = ({ color = '#FFFFFF', size = 48 }: { color?: string; size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 15C14.7614 15 17 12.7614 17 10C17 7.23858 14.7614 5 12 5C9.23858 5 7 7.23858 7 10C7 12.7614 9.23858 15 12 15Z"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M12 15V22"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M9 19H15"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export default function GenderScreen() {
   const [selectedGender, setSelectedGender] = useState<Gender>(null);
-  
-  // Animation refs
-  const maleScale = useRef(new Animated.Value(1)).current;
-  const femaleScale = useRef(new Animated.Value(1)).current;
-  const maleGlow = useRef(new Animated.Value(0)).current;
-  const femaleGlow = useRef(new Animated.Value(0)).current;
-
-  const handlePressIn = (gender: 'male' | 'female') => {
-    const scale = gender === 'male' ? maleScale : femaleScale;
-    Animated.spring(scale, {
-      toValue: 0.95,
-      useNativeDriver: true,
-      speed: 50,
-      bounciness: 4,
-    }).start();
-  };
-
-  const handlePressOut = (gender: 'male' | 'female') => {
-    const scale = gender === 'male' ? maleScale : femaleScale;
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 50,
-      bounciness: 4,
-    }).start();
-  };
 
   const handleSelect = (gender: 'male' | 'female') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedGender(gender);
-    
-    // Animate glow
-    const selectedGlow = gender === 'male' ? maleGlow : femaleGlow;
-    const otherGlow = gender === 'male' ? femaleGlow : maleGlow;
-    
-    Animated.parallel([
-      Animated.timing(selectedGlow, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }),
-      Animated.timing(otherGlow, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      }),
-    ]).start();
   };
 
   const handleContinue = () => {
@@ -75,107 +84,83 @@ export default function GenderScreen() {
     }
   };
 
-  const renderGenderCard = (
-    gender: 'male' | 'female',
-    label: string,
-    scale: Animated.Value,
-    glow: Animated.Value
-  ) => {
-    const isSelected = selectedGender === gender;
-    const IconComponent = gender === 'male' ? User : UserRound;
-
-    const borderColor = glow.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['#2A2A2A', '#CDFC00'],
-    });
-
-    const shadowOpacity = glow.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 0.5],
-    });
-
-    return (
-      <Animated.View
-        style={[
-          styles.cardWrapper,
-          {
-            transform: [{ scale }],
-          },
-        ]}
-      >
-        <Pressable
-          onPressIn={() => handlePressIn(gender)}
-          onPressOut={() => handlePressOut(gender)}
-          onPress={() => handleSelect(gender)}
-          style={styles.cardPressable}
-        >
-          <Animated.View
-            style={[
-              styles.card,
-              {
-                borderColor,
-                shadowOpacity,
-              },
-            ]}
-          >
-            {/* Character silhouette area */}
-            <View style={styles.characterContainer}>
-              <View style={[
-                styles.characterCircle,
-                isSelected && styles.characterCircleSelected,
-              ]}>
-                <IconComponent
-                  size={80}
-                  color={isSelected ? '#CDFC00' : '#666666'}
-                  strokeWidth={1.5}
-                />
-              </View>
-            </View>
-            
-            {/* Label */}
-            <Text style={[
-              styles.cardLabel,
-              isSelected && styles.cardLabelSelected,
-            ]}>
-              {label}
-            </Text>
-          </Animated.View>
-        </Pressable>
-      </Animated.View>
-    );
-  };
+  const isMaleSelected = selectedGender === 'male';
+  const isFemaleSelected = selectedGender === 'female';
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={styles.progressDot} />
-            <View style={styles.progressDot} />
-            <View style={styles.progressDot} />
+        {/* Progress dots */}
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={styles.progressDot} />
+          <View style={styles.progressDot} />
+          <View style={styles.progressDot} />
+        </View>
+
+        {/* Title Section */}
+        <View style={styles.titleSection}>
+          <Text style={styles.title}>Good day</Text>
+          <Text style={styles.titleAccent}>healthy body</Text>
+        </View>
+
+        {/* Description */}
+        <Text style={styles.description}>
+          With this app you can try different types of activities and choose the most enjoyable for you.
+        </Text>
+
+        {/* Gender Selection - S-shaped centered SVG */}
+        <View style={styles.genderContainer}>
+          <View style={styles.svgWrapper}>
+            {/* Left Panel - Male */}
+            <TouchableOpacity
+              style={[
+                styles.malePanel,
+                isMaleSelected && styles.panelSelected,
+              ]}
+              onPress={() => handleSelect('male')}
+              activeOpacity={0.8}
+            >
+              <View style={styles.genderContent}>
+                <MaleIcon 
+                  color={isMaleSelected ? '#CDFC00' : '#666666'} 
+                  size={48} 
+                />
+                <Text style={[
+                  styles.genderLabel,
+                  isMaleSelected && styles.genderLabelSelected,
+                ]}>
+                  Male
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Right Panel - Female */}
+            <TouchableOpacity
+              style={[
+                styles.femalePanel,
+                isFemaleSelected && styles.panelSelected,
+              ]}
+              onPress={() => handleSelect('female')}
+              activeOpacity={0.8}
+            >
+              <View style={styles.genderContent}>
+                <FemaleIcon 
+                  color={isFemaleSelected ? '#CDFC00' : '#666666'} 
+                  size={48} 
+                />
+                <Text style={[
+                  styles.genderLabel,
+                  isFemaleSelected && styles.genderLabelSelected,
+                ]}>
+                  Female
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Title */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>What's your</Text>
-          <Text style={styles.titleAccent}>gender?</Text>
-        </View>
-
-        {/* Gender Cards */}
-        <View style={styles.cardsContainer}>
-          {renderGenderCard('male', 'Male', maleScale, maleGlow)}
-          {renderGenderCard('female', 'Female', femaleScale, femaleGlow)}
-        </View>
-
-        {/* Tip text */}
-        <Text style={styles.tipText}>
-          This helps us personalize your workout experience
-        </Text>
-
-        {/* Bottom Button */}
+        {/* Get Started Button */}
         <View style={styles.bottomSection}>
           <TouchableOpacity
             style={[
@@ -190,7 +175,7 @@ export default function GenderScreen() {
               styles.continueButtonText,
               !selectedGender && styles.continueButtonTextDisabled,
             ]}>
-              Next
+              Get Started
             </Text>
           </TouchableOpacity>
         </View>
@@ -199,28 +184,22 @@ export default function GenderScreen() {
   );
 }
 
-const CARD_WIDTH = (SCREEN_WIDTH - 64) / 2;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#1A1A1A',
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingTop: 16,
     paddingBottom: 32,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 48,
-    paddingTop: 8,
   },
   progressContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
+    marginBottom: 40,
   },
   progressDot: {
     width: 32,
@@ -232,89 +211,89 @@ const styles = StyleSheet.create({
     backgroundColor: '#CDFC00',
   },
   titleSection: {
-    alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
+    fontFamily: 'Audiowide',
     color: '#FFFFFF',
-    textAlign: 'center',
   },
   titleAccent: {
     fontSize: 32,
-    fontWeight: '700',
-    color: '#CDFC00',
-    textAlign: 'center',
+    fontFamily: 'Audiowide',
+    color: '#FF6B35',
   },
-  cardsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 32,
-  },
-  cardWrapper: {
-    width: CARD_WIDTH,
-  },
-  cardPressable: {
-    width: '100%',
-  },
-  card: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-    borderWidth: 2,
-    shadowColor: '#CDFC00',
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  characterContainer: {
-    marginBottom: 20,
-  },
-  characterCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#252525',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  characterCircleSelected: {
-    backgroundColor: 'rgba(205, 252, 0, 0.1)',
-  },
-  cardLabel: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#888888',
-  },
-  cardLabelSelected: {
-    color: '#FFFFFF',
-  },
-  tipText: {
+  description: {
     fontSize: 14,
-    color: '#666666',
-    textAlign: 'center',
+    fontFamily: 'Averta',
+    color: 'rgba(255, 255, 255, 0.6)',
+    lineHeight: 22,
     marginBottom: 32,
+  },
+  genderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  svgWrapper: {
+    width: SCREEN_WIDTH - 48,
+    height: 280,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  malePanel: {
+    flex: 1,
+    backgroundColor: 'rgba(60, 60, 60, 0.5)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  femalePanel: {
+    flex: 1,
+    backgroundColor: 'rgba(60, 60, 60, 0.5)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  panelSelected: {
+    borderColor: '#CDFC00',
+    borderWidth: 2,
+    backgroundColor: 'rgba(205, 252, 0, 0.05)',
+  },
+  genderContent: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  genderLabel: {
+    fontSize: 18,
+    fontFamily: 'Averta-Bold',
+    color: '#666666',
+  },
+  genderLabelSelected: {
+    color: '#FFFFFF',
   },
   bottomSection: {
     marginTop: 'auto',
   },
   continueButton: {
-    backgroundColor: '#CDFC00',
+    backgroundColor: '#FF6B35',
     borderRadius: 30,
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   continueButtonDisabled: {
-    backgroundColor: '#2A2A2A',
+    backgroundColor: '#3A3A3A',
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
+    fontSize: 16,
+    fontFamily: 'Averta-Bold',
+    color: '#FFFFFF',
   },
   continueButtonTextDisabled: {
     color: '#666666',

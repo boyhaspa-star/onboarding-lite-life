@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Check } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import BodyView from 'react-native-body-highlighter';
 
 type MuscleGroup = {
@@ -198,21 +197,18 @@ export default function BodyPartsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <LinearGradient
-        colors={['#1a1a1a', '#000000']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '80%' }]} />
-          </View>
-          <Text style={styles.pageIndicator}>4 of 6</Text>
+      <View style={styles.mainContainer}>
+        {/* Progress dots */}
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={[styles.progressDot, styles.progressDotActive]} />
+          <View style={[styles.progressDot, styles.progressDotActive]} />
         </View>
 
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Target muscle groups</Text>
-          <Text style={styles.subtitle}>Select the areas you want to focus on</Text>
+          <Text style={styles.title}>Target</Text>
+          <Text style={styles.titleAccent}>muscle groups</Text>
         </View>
 
         <View style={styles.content}>
@@ -270,11 +266,13 @@ export default function BodyPartsScreen() {
             onPress={handleContinue}
             disabled={selectedMuscles.size === 0}
             activeOpacity={0.85}>
-            <Text style={styles.continueButtonText}>Continue</Text>
-            <ArrowRight size={20} color="#000000" />
+            <Text style={[
+              styles.continueButtonText,
+              selectedMuscles.size === 0 && styles.continueButtonTextDisabled
+            ]}>Next</Text>
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
     </SafeAreaView>
   );
 }
@@ -282,29 +280,26 @@ export default function BodyPartsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#1A1A1A',
   },
-  header: {
-    paddingHorizontal: 20,
+  mainContainer: {
+    flex: 1,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
     paddingTop: 16,
-    marginBottom: 8,
+    marginBottom: 32,
   },
-  progressBar: {
+  progressDot: {
+    width: 32,
     height: 4,
-    backgroundColor: '#1a1a1a',
     borderRadius: 2,
-    marginBottom: 12,
-    overflow: 'hidden',
+    backgroundColor: '#333333',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#E6FE58',
-    borderRadius: 2,
-  },
-  pageIndicator: {
-    color: '#999999',
-    fontSize: 12,
-    fontWeight: '500',
+  progressDotActive: {
+    backgroundColor: '#CDFC00',
   },
   titleSection: {
     paddingHorizontal: 20,
@@ -312,14 +307,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '800',
+    fontFamily: 'Audiowide',
     color: '#FFFFFF',
-    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#999999',
+  titleAccent: {
+    fontSize: 28,
+    fontFamily: 'Audiowide',
+    color: '#FF6B35',
   },
   content: {
     flex: 1,
@@ -339,7 +333,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     color: '#666666',
     fontSize: 10,
-    fontWeight: '700',
+    fontFamily: 'Averta-Bold',
     letterSpacing: 1,
     marginBottom: 6,
     marginLeft: 4,
@@ -356,8 +350,8 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   muscleButtonSelected: {
-    borderColor: '#E6FE58',
-    backgroundColor: 'rgba(230, 254, 88, 0.1)',
+    borderColor: '#CDFC00',
+    backgroundColor: 'rgba(205, 252, 0, 0.1)',
   },
   checkbox: {
     width: 18,
@@ -370,17 +364,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxSelected: {
-    backgroundColor: '#E6FE58',
-    borderColor: '#E6FE58',
+    backgroundColor: '#CDFC00',
+    borderColor: '#CDFC00',
   },
   muscleText: {
     color: '#cccccc',
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: 'Averta',
   },
   muscleTextSelected: {
     color: '#ffffff',
-    fontWeight: '600',
+    fontFamily: 'Averta-Bold',
   },
   rightPanel: {
     flex: 1,
@@ -399,9 +393,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(230, 254, 88, 0.15)',
+    backgroundColor: 'rgba(205, 252, 0, 0.15)',
     borderWidth: 1,
-    borderColor: '#E6FE58',
+    borderColor: '#CDFC00',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 14,
@@ -411,9 +405,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   rotateText: {
-    color: '#E6FE58',
+    color: '#CDFC00',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Averta-Bold',
   },
   buttonContainer: {
     paddingHorizontal: 20,
@@ -423,36 +417,27 @@ const styles = StyleSheet.create({
   selectionCount: {
     color: '#999999',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'Averta',
     textAlign: 'center',
     marginBottom: 12,
   },
   continueButton: {
-    backgroundColor: '#E6FE58',
-    borderRadius: 100,
-    paddingVertical: 16,
+    backgroundColor: '#FF6B35',
+    borderRadius: 30,
+    paddingVertical: 18,
     paddingHorizontal: 32,
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 12,
-    shadowColor: '#E6FE58',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 16,
   },
   continueButtonDisabled: {
-    backgroundColor: '#333333',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#3A3A3A',
   },
   continueButtonText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
+    fontFamily: 'Averta-Bold',
+    color: '#FFFFFF',
+  },
+  continueButtonTextDisabled: {
+    color: '#666666',
   },
 });

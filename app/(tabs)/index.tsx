@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, Search, Bell } from 'lucide-react-native';
-import Svg, { Circle, Text as SvgText, Path } from 'react-native-svg';
+import Svg, { Circle, Text as SvgText, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import StackIcon from '@/components/icons/StackIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -83,62 +83,79 @@ export default function HomeScreen() {
           })}
         </View>
 
-        {/* Daily Goals Card */}
-        <View style={styles.dailyGoalsCard}>
-          <View style={styles.dailyGoalsContent}>
-            <View style={styles.stackIconContainer}>
-              <StackIcon width={23} height={36} />
-            </View>
-            <View style={styles.dailyGoalsText}>
-              <Text style={styles.dailyGoalsTitle}>Daily Goals</Text>
-              <Text style={styles.dailyGoalsSubtitle}>
-                {exerciseCount} Exercise left
-              </Text>
-            </View>
-            <View style={styles.progressCircle}>
-              <Svg width={60} height={60} viewBox="0 0 60 60">
-                <Circle
-                  cx="30"
-                  cy="30"
-                  r="25"
-                  fill="none"
-                  stroke="#373E16"
-                  strokeWidth="5"
-                />
-                <Circle
-                  cx="30"
-                  cy="30"
-                  r="25"
-                  fill="none"
-                  stroke="#CDFC00"
-                  strokeWidth="5"
-                  strokeDasharray={`${157 * (completionPercentage / 100)} 157`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 30 30)"
-                />
-                <SvgText
-                  x="30"
-                  y="34"
-                  textAnchor="middle"
-                  fontSize="14"
-                  fontWeight="600"
-                  fill="#FFFFFF">
-                  {completionPercentage}%
-                </SvgText>
-              </Svg>
-            </View>
+        {/* Full Body Exercise Card - Glass Effect */}
+        <View style={styles.exerciseCard}>
+          {/* Glass Background SVG */}
+          <View style={styles.cardBackground}>
+            <Svg width="100%" height="100%" viewBox="0 0 343 186" preserveAspectRatio="none">
+              <Defs>
+                <LinearGradient id="cardGradient" x1="0" y1="0" x2="343" y2="186" gradientUnits="userSpaceOnUse">
+                  <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.15" />
+                  <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.05" />
+                </LinearGradient>
+                <LinearGradient id="borderGradient" x1="0" y1="0" x2="343" y2="186" gradientUnits="userSpaceOnUse">
+                  <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.4" />
+                  <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.1" />
+                </LinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="343" height="186" rx="20" fill="url(#cardGradient)" />
+              <Rect x="0.5" y="0.5" width="342" height="185" rx="19.5" stroke="url(#borderGradient)" strokeWidth="1" fill="none" />
+            </Svg>
           </View>
           
-          {/* Start Workout Button */}
-          <TouchableOpacity style={styles.startWorkoutButton} activeOpacity={0.85}>
-            <Text style={styles.startWorkoutText}>Start Workout</Text>
-            <Svg width={16} height={16} viewBox="0 0 24 24">
-              <Path
-                d="M8 5v14l11-7z"
-                fill="#000000"
-              />
-            </Svg>
-          </TouchableOpacity>
+          {/* Card Content */}
+          <View style={styles.exerciseCardContent}>
+            <View style={styles.exerciseCardTop}>
+              <View style={styles.exerciseTitleRow}>
+                <View style={styles.stackIconContainer}>
+                  <StackIcon width={20} height={32} />
+                </View>
+                <View style={styles.exerciseTitleSection}>
+                  <Text style={styles.exerciseTitle}>Your Daily</Text>
+                  <Text style={styles.exerciseTitle}>Progress</Text>
+                </View>
+              </View>
+              
+              {/* Progress Circle - Lime Green */}
+              <View style={styles.progressCircle}>
+                <Svg width={70} height={70} viewBox="0 0 70 70">
+                  <Circle
+                    cx="35"
+                    cy="35"
+                    r="28"
+                    fill="none"
+                    stroke="#373E16"
+                    strokeWidth="5"
+                  />
+                  <Circle
+                    cx="35"
+                    cy="35"
+                    r="28"
+                    fill="none"
+                    stroke="#CDFC00"
+                    strokeWidth="5"
+                    strokeDasharray={`${176 * (completionPercentage / 100)} 176`}
+                    strokeLinecap="round"
+                    transform="rotate(-90 35 35)"
+                  />
+                  <SvgText
+                    x="35"
+                    y="40"
+                    textAnchor="middle"
+                    fontSize="16"
+                    fontWeight="600"
+                    fill="#FFFFFF">
+                    {completionPercentage}%
+                  </SvgText>
+                </Svg>
+              </View>
+            </View>
+            
+            {/* Start Workout Button - Orange */}
+            <TouchableOpacity style={styles.startWorkoutButton} activeOpacity={0.85}>
+              <Text style={styles.startWorkoutText}>Start workout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Daily Goal Section */}
@@ -254,53 +271,70 @@ const styles = StyleSheet.create({
   dateNumberActive: {
     color: '#FFFFFF',
   },
-  dailyGoalsCard: {
-    backgroundColor: '#1A1A1A',
+  exerciseCard: {
+    height: 186,
     borderRadius: 20,
-    padding: 16,
     marginBottom: 24,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  dailyGoalsContent: {
+  cardBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  exerciseCardContent: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'space-between',
+  },
+  exerciseCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  exerciseTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  stackIconContainer: {
-    marginRight: 12,
-  },
-  dailyGoalsText: {
     flex: 1,
   },
-  dailyGoalsTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
+  stackIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(50, 50, 50, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  dailyGoalsSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.4)',
+  exerciseTitleSection: {
+    flex: 1,
+  },
+  exerciseTitle: {
+    fontSize: 28,
+    fontFamily: 'Audiowide',
+    color: '#FFFFFF',
+    lineHeight: 34,
   },
   progressCircle: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     justifyContent: 'center',
     alignItems: 'center',
   },
   startWorkoutButton: {
-    backgroundColor: '#CDFC00',
+    backgroundColor: '#FF6B35',
     borderRadius: 30,
-    paddingVertical: 16,
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
+    alignSelf: 'flex-start',
   },
   startWorkoutText: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
+    fontFamily: 'Averta-Bold',
+    color: '#FFFFFF',
   },
   sectionTitle: {
     fontSize: 20,

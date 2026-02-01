@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   logoText: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'Audiowide',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   calText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'Averta',
   },
   kgBadge: {
     position: 'absolute',
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   kgText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: 'Averta',
   },
   dottedLineHorizontal: {
     position: 'absolute',
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   headlineText: {
     fontSize: 36,
-    fontWeight: '800',
+    fontFamily: 'Audiowide',
     color: '#FFFFFF',
     letterSpacing: -0.5,
   },
@@ -260,13 +260,13 @@ const styles = StyleSheet.create({
   },
   betterText: {
     fontSize: 36,
-    fontWeight: '800',
+    fontFamily: 'Audiowide',
     color: '#000000',
     letterSpacing: -0.5,
   },
   descriptionText: {
     fontSize: 14,
-    fontWeight: '400',
+    fontFamily: 'Averta',
     lineHeight: 22,
     color: 'rgba(255, 255, 255, 0.7)',
     marginTop: 8,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Averta-Bold',
     color: '#000000',
     letterSpacing: 0.5,
   },
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   signUpButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Averta-Bold',
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },

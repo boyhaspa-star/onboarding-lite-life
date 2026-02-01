@@ -12,7 +12,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -169,19 +168,19 @@ export default function AgeScreen() {
         style={styles.container}
       >
         <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: '50%' }]} />
-            </View>
-            <Text style={styles.pageIndicator}>2 of 4</Text>
+          {/* Progress dots */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={styles.progressDot} />
+            <View style={styles.progressDot} />
           </View>
 
           {/* Title */}
-          <Text style={styles.title}>What's your age?</Text>
-          <Text style={styles.subtitle}>
-            We'll use this to create your personalized workout plan
-          </Text>
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>What's your</Text>
+            <Text style={styles.titleAccent}>age?</Text>
+          </View>
 
           {/* Picker */}
           <View style={styles.pickerWrapper}>
@@ -220,8 +219,7 @@ export default function AgeScreen() {
             onPress={handleContinue}
             activeOpacity={0.8}
           >
-            <Text style={styles.continueButtonText}>Continue</Text>
-            <ArrowRight size={20} color="#000" />
+            <Text style={styles.continueButtonText}>Next</Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -232,7 +230,7 @@ export default function AgeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#1A1A1A',
   },
   content: {
     flex: 1,
@@ -240,37 +238,33 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 40,
   },
-  header: {
-    marginBottom: 32,
+  progressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 40,
   },
-  progressBar: {
+  progressDot: {
+    width: 32,
     height: 4,
-    backgroundColor: '#222',
     borderRadius: 2,
-    marginBottom: 12,
+    backgroundColor: '#333333',
   },
-  progressFill: {
-    height: '100%',
+  progressDotActive: {
     backgroundColor: '#CDFC00',
-    borderRadius: 2,
   },
-  pageIndicator: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+  titleSection: {
+    marginBottom: 24,
   },
   title: {
-    fontSize: 34,
-    fontWeight: '700',
+    fontSize: 32,
+    fontFamily: 'Audiowide',
     color: '#FFFFFF',
-    marginBottom: 12,
-    letterSpacing: -0.5,
   },
-  subtitle: {
-    fontSize: 17,
-    color: '#888',
-    lineHeight: 24,
-    marginBottom: 40,
+  titleAccent: {
+    fontSize: 32,
+    fontFamily: 'Audiowide',
+    color: '#FF6B35',
   },
   pickerWrapper: {
     flex: 1,
@@ -328,18 +322,17 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
   },
   continueButton: {
-    backgroundColor: '#CDFC00',
+    backgroundColor: '#FF6B35',
     borderRadius: 30,
     paddingVertical: 18,
     paddingHorizontal: 32,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 16,
+    fontFamily: 'Averta-Bold',
+    color: '#FFFFFF',
   },
 });
