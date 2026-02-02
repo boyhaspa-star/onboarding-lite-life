@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, Search, Bell } from 'lucide-react-native';
-import Svg, { Circle, Text as SvgText, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
+import Svg, { Circle, Text as SvgText, Defs, LinearGradient, Stop, Rect, Path, ClipPath, G, Mask } from 'react-native-svg';
+import PagerView from 'react-native-pager-view';
 import StackIcon from '@/components/icons/StackIcon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -16,18 +17,46 @@ const days = [
   { id: 'fri', label: 'Fri', date: '06' },
 ];
 
+const goalCards = [
+  { 
+    id: '1', 
+    title: 'Full Body', 
+    subtitle: 'Exercise', 
+    emoji: '💪', 
+    progress: 50, 
+    image: require('@/assets/images/plank-exercise.png'),
+    imageStyle: { bottom:45, right: -10, width: '105%', height: '70%' }  // Horizontal plank
+  },
+  { 
+    id: '2', 
+    title: 'Cardio', 
+    subtitle: 'Workout', 
+    emoji: '🏃', 
+    progress: 30, 
+    image: require('@/assets/images/squate.png'),
+    imageStyle: { bottom: 0, right: 23, width: '55%', height: '95%' }  // Vertical squat
+  },
+  { 
+    id: '3', 
+    title: 'Strength', 
+    subtitle: 'Training', 
+    emoji: '🏋️', 
+    progress: 75,
+    image: require('@/assets/images/cardio.png'),
+    imageStyle: { bottom: 0, right: 10, width: '55%', height: '95%' }  // Vertical running pose
+  },
+];
+
 export default function HomeScreen() {
   const [selectedDay, setSelectedDay] = useState('sun');
+  const [activeGoalIndex, setActiveGoalIndex] = useState(0);
   const exerciseCount = 12;
   const completedExercises = 3;
   const completionPercentage = Math.round((completedExercises / exerciseCount) * 100);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
+      <View style={styles.mainContent}>
         
         {/* Header with Weather and Actions */}
         <View style={styles.header}>
@@ -161,23 +190,125 @@ export default function HomeScreen() {
         {/* Daily Goal Section */}
         <Text style={styles.sectionTitle}>Daily Goal</Text>
         
-        {/* Goal Card 1 */}
-        <View style={styles.goalCard}>
-          <View style={styles.goalCardPlaceholder} />
-          <View style={styles.goalCardFooter}>
-            <Text style={styles.goalCardText}>Do 5 exercises today</Text>
-            <TouchableOpacity style={styles.goalCardButton}>
-              <ChevronRight size={20} color="#000000" />
-            </TouchableOpacity>
-          </View>
+        {/* Goal Cards Swiper - Takes remaining height */}
+        <View style={styles.goalSwiperContainer}>
+          <PagerView
+          style={styles.pagerView}
+          initialPage={0}
+          onPageSelected={(e) => setActiveGoalIndex(e.nativeEvent.position)}
+        >
+          {goalCards.map((item, index) => (
+            <View key={item.id} style={styles.goalCardPage}>
+              <View style={styles.goalCard}>
+                {/* SVG Shape - L-shape with button cutout */}
+                <View style={styles.goalCardBackground}>
+                  <Svg width="100%" height="100%" viewBox="0 0 327 184" preserveAspectRatio="none">
+                    <Defs>
+                      <LinearGradient id={`goalCardGradient-${index}`} x1="0" y1="0" x2="327" y2="176" gradientUnits="userSpaceOnUse">
+                        <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.15" />
+                        <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.05" />
+                      </LinearGradient>
+                      <LinearGradient id={`goalBorderGradient-${index}`} x1="0" y1="0" x2="327" y2="176" gradientUnits="userSpaceOnUse">
+                        <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.4" />
+                        <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.1" />
+                      </LinearGradient>
+                    </Defs>
+                    {/* Fill - L-shape with glass gradient */}
+                    <Path 
+                      d="M16 0C7.163 0 0 7.163 0 16V136H155C163.837 136 171 143.163 171 152V160C171 168.837 178.163 176 187 176H311C319.837 176 327 168.837 327 160V16C327 7.163 319.837 0 311 0H16Z" 
+                      fill={`url(#goalCardGradient-${index})`}
+                    />
+                    {/* Border - glass border gradient */}
+                    <Path 
+                      d="M16 2C8.268 2 2 8.268 2 16V134H155C164.941 134 173 142.059 173 152V160C173 167.732 179.268 174 187 174H311C318.732 174 325 167.732 325 160V16C325 8.268 318.732 2 311 2H16Z" 
+                      fill="none"
+                      stroke={`url(#goalBorderGradient-${index})`}
+                      strokeWidth="1"
+                    />
+                  </Svg>
+                </View>
+                
+                {/* Exercise Image */}
+                {item.image && (
+                  <Image
+                    source={item.image}
+                    style={[styles.goalExerciseImage, item.imageStyle]}
+                    resizeMode="contain"
+                  />
+                )}
+                
+                {/* Card Content - Same layout as Daily Progress */}
+                <View style={styles.goalCardContent}>
+                  <View style={styles.goalCardTop}>
+                    <View style={styles.goalTitleRow}>
+                      <View style={styles.goalIconContainer}>
+                        <Text style={styles.goalEmoji}>{item.emoji}</Text>
+                      </View>
+                      <View style={styles.goalTitleSection}>
+                        <Text style={styles.goalTitle}>{item.title}</Text>
+                        <Text style={styles.goalTitle}>{item.subtitle}</Text>
+                      </View>
+                    </View>
+                    
+                    {/* Progress Circle */}
+                    <View style={styles.goalProgressCircle}>
+                      <Svg width={70} height={70} viewBox="0 0 70 70">
+                        <Circle
+                          cx="35"
+                          cy="35"
+                          r="28"
+                          fill="none"
+                          stroke="#373E16"
+                          strokeWidth="5"
+                        />
+                        <Circle
+                          cx="35"
+                          cy="35"
+                          r="28"
+                          fill="none"
+                          stroke="#CDFC00"
+                          strokeWidth="5"
+                          strokeDasharray={`${176 * (item.progress / 100)} 176`}
+                          strokeLinecap="round"
+                          transform="rotate(-90 35 35)"
+                        />
+                        <SvgText
+                          x="35"
+                          y="40"
+                          textAnchor="middle"
+                          fontSize="16"
+                          fontWeight="600"
+                          fill="#FFFFFF">
+                          {item.progress}%
+                        </SvgText>
+                      </Svg>
+                    </View>
+                  </View>
+                </View>
+                
+                {/* Start Workout Button - Positioned in cutout */}
+                <TouchableOpacity style={styles.goalStartButton} activeOpacity={0.85}>
+                  <Text style={styles.goalStartButtonText}>Start workout</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </PagerView>
+        
+        {/* Page Indicators */}
+        <View style={styles.indicatorContainer}>
+          {goalCards.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.indicator,
+                activeGoalIndex === index && styles.indicatorActive,
+              ]}
+            />
+          ))}
         </View>
-
-        {/* Goal Card 2 */}
-        <View style={styles.goalCard}>
-          <View style={styles.goalCardPlaceholder} />
         </View>
-
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -187,19 +318,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0A0A0A',
   },
-  scrollView: {
+  paddingTop: 8,
+  mainContent: {
     flex: 1,
-  },
-  scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginTop: 8,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   weatherSection: {
     flex: 1,
@@ -340,36 +469,116 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginBottom: 16,
+    marginBottom: 12,
+  },
+  goalSwiperContainer: {
+    flex: 1,
+  },
+  pagerView: {
+    flex: 1,
+  },
+  goalCardPage: {
+    flex: 1,
+    paddingRight: 16,
   },
   goalCard: {
-    backgroundColor: '#D9D9D9',
-    borderRadius: 16,
-    marginBottom: 16,
+    flex: 1,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
     overflow: 'hidden',
+    position: 'relative',
   },
-  goalCardPlaceholder: {
-    height: 140,
-    backgroundColor: '#D9D9D9',
+  goalCardBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  goalCardFooter: {
+  goalCardContent: {
+    flex: 1,
+    padding: 20,
+    paddingBottom: 60,
+  },
+  goalExerciseImage: {
+    position: 'absolute',
+    opacity: 0.9,
+  },
+  goalCardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  goalTitleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    flex: 1,
   },
-  goalCardText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333333',
-  },
-  goalCardButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#CDFC00',
+  goalIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(50, 50, 50, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
+  },
+  goalEmoji: {
+    fontSize: 20,
+  },
+  goalTitleSection: {
+    flex: 1,
+  },
+  goalTitle: {
+    fontSize: 24,
+    fontFamily: 'Audiowide',
+    color: '#FFFFFF',
+    lineHeight: 30,
+  },
+  goalProgressCircle: {
+    width: 70,
+    height: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goalStartButton: {
+    position: 'absolute',
+    bottom: 16,
+    left: 0,
+    backgroundColor: '#FF6B35',
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 0,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    width: '52%',
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goalStartButtonText: {
+    fontSize: 16,
+    fontFamily: 'Averta-Bold',
+    color: '#FFFFFF',
+  },
+  indicatorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#333333',
+  },
+  indicatorActive: {
+    backgroundColor: '#CDFC00',
+    width: 24,
   },
 });
