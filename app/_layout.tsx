@@ -6,6 +6,7 @@ import { useFonts } from 'expo-font';
 import { Audiowide_400Regular } from '@expo-google-fonts/audiowide';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { OnboardingProvider } from '@/context/OnboardingContext';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
@@ -30,7 +31,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <OnboardingProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" options={{ animationEnabled: true }} />
@@ -38,6 +39,6 @@ export default function RootLayout() {
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="light" />
-    </>
+    </OnboardingProvider>
   );
 }
