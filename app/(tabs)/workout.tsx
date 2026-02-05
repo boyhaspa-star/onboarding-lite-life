@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, ImageStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Bell } from 'lucide-react-native';
 import Svg, { Circle, Text as SvgText, Defs, LinearGradient, Stop, Path } from 'react-native-svg';
+import BodyView, { ExtendedBodyPart } from 'react-native-body-highlighter';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -23,8 +24,8 @@ const workoutPrograms: Array<{
   progress: number;
   duration: string;
   exercises: number;
-  image: any;
-  imageStyle: ImageStyle;
+  targetMuscles: ExtendedBodyPart[];
+  bodySide: 'front' | 'back';
 }> = [
   {
     id: '1',
@@ -34,8 +35,18 @@ const workoutPrograms: Array<{
     progress: 50,
     duration: '45 min',
     exercises: 12,
-    image: require('@/assets/images/plank-exercise.png'),
-    imageStyle: { bottom: 15, right: -15, width: '75%' as any, height: '75%' as any },
+    targetMuscles: [
+      { slug: 'chest', intensity: 2 },
+      { slug: 'deltoids', intensity: 2 },
+      { slug: 'biceps', intensity: 2 },
+      { slug: 'forearm', intensity: 2 },
+      { slug: 'abs', intensity: 2 },
+      { slug: 'obliques', intensity: 2 },
+      { slug: 'quadriceps', intensity: 2 },
+      { slug: 'adductors', intensity: 2 },
+      { slug: 'calves', intensity: 2 },
+    ],
+    bodySide: 'front',
   },
   {
     id: '2',
@@ -45,8 +56,14 @@ const workoutPrograms: Array<{
     progress: 25,
     duration: '35 min',
     exercises: 8,
-    image: require('@/assets/images/squate.png'),
-    imageStyle: { bottom: 5, right: 5, width: '50%' as any, height: '85%' as any },
+    targetMuscles: [
+      { slug: 'chest', intensity: 2 },
+      { slug: 'deltoids', intensity: 2 },
+      { slug: 'biceps', intensity: 2 },
+      { slug: 'forearm', intensity: 2 },
+      { slug: 'trapezius', intensity: 2 },
+    ],
+    bodySide: 'front',
   },
   {
     id: '3',
@@ -56,8 +73,13 @@ const workoutPrograms: Array<{
     progress: 60,
     duration: '25 min',
     exercises: 10,
-    image: require('@/assets/images/cardio.png'),
-    imageStyle: { bottom: 5, right: 10, width: '50%' as any, height: '85%' as any },
+    targetMuscles: [
+      { slug: 'quadriceps', intensity: 2 },
+      { slug: 'calves', intensity: 2 },
+      { slug: 'abs', intensity: 2 },
+      { slug: 'deltoids', intensity: 2 },
+    ],
+    bodySide: 'front',
   },
   {
     id: '4',
@@ -67,8 +89,13 @@ const workoutPrograms: Array<{
     progress: 0,
     duration: '40 min',
     exercises: 9,
-    image: require('@/assets/images/yoga.png'),
-    imageStyle: { bottom: 5, right: 10, width: '50%' as any, height: '85%' as any },
+    targetMuscles: [
+      { slug: 'quadriceps', intensity: 2 },
+      { slug: 'hamstring', intensity: 2 },
+      { slug: 'gluteal', intensity: 2 },
+      { slug: 'calves', intensity: 2 },
+    ],
+    bodySide: 'back',
   },
 ];
 
@@ -152,24 +179,20 @@ export default function WorkoutScreen() {
               </Svg>
             </View>
 
-            {/* Workout Image */}
-            <Image
-              source={workout.image}
-              style={[styles.workoutImage, workout.imageStyle]}
-              resizeMode="contain"
-            />
-
-            {/* Card Content */}
-            <View style={styles.cardContent}>
-              {/* Title & Meta */}
-              <View style={styles.cardHeader}>
-                <View style={styles.titleArea}>
-                  <Text style={styles.workoutTitle}>{workout.title}</Text>
-                  <Text style={styles.workoutSubtitle}>{workout.subtitle}</Text>
-                </View>
-                
-                {/* Progress Ring */}
-                <View style={styles.progressRing}>
+            {/* Body Skeleton + Progress Ring Container */}
+            <View style={styles.bodyAndProgressContainer}>
+              <View style={styles.bodySkeletonContainer}>
+                <BodyView
+                  data={workout.targetMuscles}
+                  gender="male"
+                  side={workout.bodySide}
+                  scale={0.38}
+                  colors={['#FF6B35', '#FFA726']}
+                />
+              </View>
+              
+              {/* Progress Ring */}
+              <View style={styles.progressRing}>
                   <Svg width={52} height={52} viewBox="0 0 52 52">
                     <Circle
                       cx="26"
@@ -202,6 +225,16 @@ export default function WorkoutScreen() {
                       {workout.progress}%
                     </SvgText>
                   </Svg>
+                </View>
+            </View>
+
+            {/* Card Content */}
+            <View style={styles.cardContent}>
+              {/* Title & Meta */}
+              <View style={styles.cardHeader}>
+                <View style={styles.titleArea}>
+                  <Text style={styles.workoutTitle}>{workout.title}</Text>
+                  <Text style={styles.workoutSubtitle}>{workout.subtitle}</Text>
                 </View>
               </View>
 
@@ -316,19 +349,34 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  workoutImage: {
+  bodyAndProgressContainer: {
     position: 'absolute',
-    opacity: 0.9,
+    right: 10,
+    top: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  bodySkeletonContainer: {
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0.95,
+  },
+  progressRing: {
+    marginRight: 5,
   },
   cardContent: {
     flex: 1,
     padding: 18,
     paddingBottom: 55,
+    paddingRight: 140,
     justifyContent: 'space-between',
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'flex-start',
   },
   titleArea: {
@@ -344,9 +392,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888888',
     fontWeight: '500',
-  },
-  progressRing: {
-    marginLeft: 12,
   },
   metaRow: {
     flexDirection: 'row',
