@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Dimensions, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
-import { ChevronLeft, Play, Clock, Flame, Dumbbell, Check, Search, Sparkles, ListChecks, X } from 'lucide-react-native';
+import { ChevronLeft, Play, Clock, Dumbbell, Check, Search, Sparkles, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import BodyView, { ExtendedBodyPart } from 'react-native-body-highlighter';
+import Svg, { Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_GAP = 14;
@@ -31,7 +33,8 @@ const workoutData: Record<string, {
     name: string;
     duration: string;
     reps?: string;
-    image: any;
+    targetMuscles: ExtendedBodyPart[];
+    bodySide: 'front' | 'back';
     category: string;
     muscleGroup: string;
     isRecommended: boolean; // Based on user's onboarding body parts
@@ -44,16 +47,16 @@ const workoutData: Record<string, {
     duration: '45 min',
     calories: 320,
     exercises: [
-      { id: 'e1', name: 'Warm Up Jog', duration: '5 min', image: require('@/assets/images/cardio.png'), category: 'warmup', muscleGroup: 'full', isRecommended: true },
-      { id: 'e2', name: 'Push Ups', duration: '3 min', reps: '3 x 15', image: require('@/assets/images/plank-exercise.png'), category: 'strength', muscleGroup: 'chest', isRecommended: true },
-      { id: 'e3', name: 'Squats', duration: '4 min', reps: '3 x 20', image: require('@/assets/images/squate.png'), category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Plank Hold', duration: '3 min', reps: '3 x 45s', image: require('@/assets/images/plank-exercise.png'), category: 'core', muscleGroup: 'abs', isRecommended: true },
-      { id: 'e5', name: 'Lunges', duration: '4 min', reps: '3 x 12', image: require('@/assets/images/yoga.png'), category: 'strength', muscleGroup: 'legs', isRecommended: false },
-      { id: 'e6', name: 'Burpees', duration: '4 min', reps: '3 x 10', image: require('@/assets/images/cardio.png'), category: 'cardio', muscleGroup: 'full', isRecommended: false },
-      { id: 'e7', name: 'Mountain Climbers', duration: '3 min', reps: '3 x 30s', image: require('@/assets/images/plank-exercise.png'), category: 'cardio', muscleGroup: 'core', isRecommended: false },
-      { id: 'e8', name: 'Jumping Jacks', duration: '3 min', image: require('@/assets/images/cardio.png'), category: 'cardio', muscleGroup: 'full', isRecommended: false },
-      { id: 'e9', name: 'Tricep Dips', duration: '3 min', reps: '3 x 12', image: require('@/assets/images/plank-exercise.png'), category: 'strength', muscleGroup: 'arms', isRecommended: false },
-      { id: 'e10', name: 'Cool Down Stretch', duration: '5 min', image: require('@/assets/images/yoga.png'), category: 'cooldown', muscleGroup: 'full', isRecommended: true },
+      { id: 'e1', name: 'Warm Up Jog', duration: '5 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
+      { id: 'e2', name: 'Push Ups', duration: '3 min', reps: '3 x 15', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
+      { id: 'e3', name: 'Squats', duration: '4 min', reps: '3 x 20', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e4', name: 'Plank Hold', duration: '3 min', reps: '3 x 45s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'core', muscleGroup: 'abs', isRecommended: true },
+      { id: 'e5', name: 'Lunges', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e6', name: 'Burpees', duration: '4 min', reps: '3 x 10', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
+      { id: 'e7', name: 'Mountain Climbers', duration: '3 min', reps: '3 x 30s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: false },
+      { id: 'e8', name: 'Jumping Jacks', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
+      { id: 'e9', name: 'Tricep Dips', duration: '3 min', reps: '3 x 12', targetMuscles: [{ slug: 'triceps', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: false },
+      { id: 'e10', name: 'Cool Down Stretch', duration: '5 min', targetMuscles: [{ slug: 'hamstring', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'cooldown', muscleGroup: 'full', isRecommended: true },
     ],
   },
   '2': {
@@ -63,12 +66,12 @@ const workoutData: Record<string, {
     duration: '35 min',
     calories: 280,
     exercises: [
-      { id: 'e1', name: 'Arm Circles', duration: '3 min', image: require('@/assets/images/cardio.png'), category: 'warmup', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e2', name: 'Diamond Push Ups', duration: '4 min', reps: '3 x 12', image: require('@/assets/images/plank-exercise.png'), category: 'strength', muscleGroup: 'chest', isRecommended: true },
-      { id: 'e3', name: 'Tricep Dips', duration: '4 min', reps: '3 x 15', image: require('@/assets/images/squate.png'), category: 'strength', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e4', name: 'Bicep Curls', duration: '4 min', reps: '3 x 12', image: require('@/assets/images/yoga.png'), category: 'strength', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e5', name: 'Wide Push Ups', duration: '4 min', reps: '3 x 12', image: require('@/assets/images/plank-exercise.png'), category: 'strength', muscleGroup: 'chest', isRecommended: false },
-      { id: 'e6', name: 'Shoulder Taps', duration: '3 min', reps: '3 x 20', image: require('@/assets/images/plank-exercise.png'), category: 'strength', muscleGroup: 'shoulders', isRecommended: false },
+      { id: 'e1', name: 'Arm Circles', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'arms', isRecommended: true },
+      { id: 'e2', name: 'Diamond Push Ups', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
+      { id: 'e3', name: 'Tricep Dips', duration: '4 min', reps: '3 x 15', targetMuscles: [{ slug: 'triceps', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: true },
+      { id: 'e4', name: 'Bicep Curls', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'biceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'arms', isRecommended: true },
+      { id: 'e5', name: 'Wide Push Ups', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: false },
+      { id: 'e6', name: 'Shoulder Taps', duration: '3 min', reps: '3 x 20', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'shoulders', isRecommended: false },
     ],
   },
   '3': {
@@ -78,12 +81,12 @@ const workoutData: Record<string, {
     duration: '25 min',
     calories: 350,
     exercises: [
-      { id: 'e1', name: 'Jumping Jacks', duration: '3 min', image: require('@/assets/images/cardio.png'), category: 'warmup', muscleGroup: 'full', isRecommended: true },
-      { id: 'e2', name: 'Burpees', duration: '4 min', reps: '4 x 10', image: require('@/assets/images/plank-exercise.png'), category: 'cardio', muscleGroup: 'full', isRecommended: true },
-      { id: 'e3', name: 'High Knees', duration: '3 min', image: require('@/assets/images/cardio.png'), category: 'cardio', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Mountain Climbers', duration: '4 min', reps: '3 x 30s', image: require('@/assets/images/plank-exercise.png'), category: 'cardio', muscleGroup: 'core', isRecommended: true },
-      { id: 'e5', name: 'Box Jumps', duration: '4 min', reps: '3 x 12', image: require('@/assets/images/squate.png'), category: 'cardio', muscleGroup: 'legs', isRecommended: false },
-      { id: 'e6', name: 'Sprint Intervals', duration: '5 min', image: require('@/assets/images/cardio.png'), category: 'cardio', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e1', name: 'Jumping Jacks', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
+      { id: 'e2', name: 'Burpees', duration: '4 min', reps: '4 x 10', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: true },
+      { id: 'e3', name: 'High Knees', duration: '3 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e4', name: 'Mountain Climbers', duration: '4 min', reps: '3 x 30s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: true },
+      { id: 'e5', name: 'Box Jumps', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e6', name: 'Sprint Intervals', duration: '5 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
     ],
   },
   '4': {
@@ -93,12 +96,12 @@ const workoutData: Record<string, {
     duration: '40 min',
     calories: 300,
     exercises: [
-      { id: 'e1', name: 'Leg Swings', duration: '3 min', image: require('@/assets/images/yoga.png'), category: 'warmup', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e2', name: 'Goblet Squats', duration: '5 min', reps: '4 x 12', image: require('@/assets/images/squate.png'), category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e3', name: 'Walking Lunges', duration: '5 min', reps: '3 x 20', image: require('@/assets/images/yoga.png'), category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Calf Raises', duration: '4 min', reps: '3 x 20', image: require('@/assets/images/squate.png'), category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e5', name: 'Glute Bridges', duration: '4 min', reps: '3 x 15', image: require('@/assets/images/yoga.png'), category: 'strength', muscleGroup: 'glutes', isRecommended: false },
-      { id: 'e6', name: 'Wall Sit', duration: '3 min', reps: '3 x 45s', image: require('@/assets/images/squate.png'), category: 'strength', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e1', name: 'Leg Swings', duration: '3 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e2', name: 'Goblet Squats', duration: '5 min', reps: '4 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e3', name: 'Walking Lunges', duration: '5 min', reps: '3 x 20', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e4', name: 'Calf Raises', duration: '4 min', reps: '3 x 20', targetMuscles: [{ slug: 'calves', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e5', name: 'Glute Bridges', duration: '4 min', reps: '3 x 15', targetMuscles: [{ slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'glutes', isRecommended: false },
+      { id: 'e6', name: 'Wall Sit', duration: '3 min', reps: '3 x 45s', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
     ],
   },
 };
@@ -107,13 +110,9 @@ export default function ExercisesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const workout = workoutData[id || '1'];
   
-  // State
+  // State - simplified
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isSmartPlan, setIsSmartPlan] = useState(true); // Smart Plan vs Custom mode
-  const [selectedExercises, setSelectedExercises] = useState<Set<string>>(
-    new Set(workout?.exercises.filter(e => e.isRecommended).map(e => e.id) || [])
-  );
   const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
 
   // Filter exercises based on search and category
@@ -128,40 +127,22 @@ export default function ExercisesScreen() {
     });
   }, [workout, searchQuery, selectedCategory]);
 
-  // Calculate stats based on selected exercises only
-  const selectedCount = selectedExercises.size;
-  const completedCount = [...selectedExercises].filter(id => completedExercises.has(id)).length;
-  const progress = selectedCount > 0 ? Math.round((completedCount / selectedCount) * 100) : 0;
+  // Calculate stats
+  const totalCount = workout?.exercises.length || 0;
+  const completedCount = completedExercises.size;
+  const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   
-  // Calculate estimated duration for selected exercises
-  const estimatedDuration = useMemo(() => {
+  // Calculate total duration
+  const totalDuration = useMemo(() => {
     if (!workout) return '0 min';
-    const totalMinutes = workout.exercises
-      .filter(e => selectedExercises.has(e.id))
-      .reduce((acc, e) => {
-        const mins = parseInt(e.duration) || 0;
-        return acc + mins;
-      }, 0);
+    const totalMinutes = workout.exercises.reduce((acc, e) => {
+      const mins = parseInt(e.duration) || 0;
+      return acc + mins;
+    }, 0);
     return `${totalMinutes} min`;
-  }, [workout, selectedExercises]);
-
-  const toggleExerciseSelection = (exerciseId: string) => {
-    if (isSmartPlan) return; // Can't manually select in smart plan mode
-    
-    setSelectedExercises(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(exerciseId)) {
-        newSet.delete(exerciseId);
-      } else {
-        newSet.add(exerciseId);
-      }
-      return newSet;
-    });
-  };
+  }, [workout]);
 
   const toggleExerciseCompleted = (exerciseId: string) => {
-    if (!selectedExercises.has(exerciseId)) return; // Can only complete selected exercises
-    
     setCompletedExercises(prev => {
       const newSet = new Set(prev);
       if (newSet.has(exerciseId)) {
@@ -171,15 +152,6 @@ export default function ExercisesScreen() {
       }
       return newSet;
     });
-  };
-
-  const switchToSmartPlan = () => {
-    setIsSmartPlan(true);
-    setSelectedExercises(new Set(workout?.exercises.filter(e => e.isRecommended).map(e => e.id) || []));
-  };
-
-  const switchToCustom = () => {
-    setIsSmartPlan(false);
   };
 
   if (!workout) {
@@ -227,30 +199,6 @@ export default function ExercisesScreen() {
         </View>
       </View>
 
-      {/* Smart Plan / Custom Toggle */}
-      <View style={styles.modeToggleContainer}>
-        <TouchableOpacity 
-          style={[styles.modeToggle, isSmartPlan && styles.modeToggleActive]}
-          onPress={switchToSmartPlan}
-          activeOpacity={0.8}
-        >
-          <Sparkles size={16} color={isSmartPlan ? '#000000' : '#888888'} />
-          <Text style={[styles.modeToggleText, isSmartPlan && styles.modeToggleTextActive]}>
-            Smart Plan
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.modeToggle, !isSmartPlan && styles.modeToggleActive]}
-          onPress={switchToCustom}
-          activeOpacity={0.8}
-        >
-          <ListChecks size={16} color={!isSmartPlan ? '#000000' : '#888888'} />
-          <Text style={[styles.modeToggleText, !isSmartPlan && styles.modeToggleTextActive]}>
-            Custom
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Category Pills */}
       <ScrollView 
         horizontal 
@@ -278,7 +226,7 @@ export default function ExercisesScreen() {
       {/* Stats Row */}
       <View style={styles.statsRow}>
         <Text style={styles.statsText}>
-          <Text style={styles.statsHighlight}>{selectedCount}</Text> exercises  •  {estimatedDuration}
+          <Text style={styles.statsHighlight}>{completedCount}/{totalCount}</Text> completed  •  {totalDuration}
         </Text>
         {progress > 0 && (
           <Text style={styles.progressBadge}>{progress}%</Text>
@@ -292,7 +240,6 @@ export default function ExercisesScreen() {
         contentContainerStyle={styles.gridContainer}
       >
         {filteredExercises.map((exercise, index) => {
-          const isSelected = selectedExercises.has(exercise.id);
           const isCompleted = completedExercises.has(exercise.id);
           
           return (
@@ -301,31 +248,39 @@ export default function ExercisesScreen() {
               style={[
                 styles.gridCard,
                 index % 2 === 0 ? styles.gridCardLeft : styles.gridCardRight,
-                !isSelected && styles.gridCardUnselected,
               ]}
               activeOpacity={0.9}
-              onPress={() => isSmartPlan ? toggleExerciseCompleted(exercise.id) : toggleExerciseSelection(exercise.id)}
-              onLongPress={() => !isSmartPlan && toggleExerciseCompleted(exercise.id)}
+              onPress={() => toggleExerciseCompleted(exercise.id)}
             >
-              <Image
-                source={exercise.image}
-                style={styles.cardImage}
-                resizeMode="cover"
-              />
+              {/* Card Border */}
+              <View style={styles.cardBorder}>
+                <Svg width="100%" height="100%" viewBox={`0 0 ${CARD_WIDTH} ${CARD_WIDTH * 1.25}`} preserveAspectRatio="none">
+                  <Defs>
+                    <SvgLinearGradient id={`cardBorder-${exercise.id}`} x1="0" y1="0" x2={CARD_WIDTH} y2={CARD_WIDTH * 1.25} gradientUnits="userSpaceOnUse">
+                      <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.3" />
+                      <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.05" />
+                    </SvgLinearGradient>
+                  </Defs>
+                  <Rect x="0.5" y="0.5" width={CARD_WIDTH - 1} height={CARD_WIDTH * 1.25 - 1} rx="19.5" stroke={`url(#cardBorder-${exercise.id})`} strokeWidth="1" fill="none" />
+                </Svg>
+              </View>
+              
+              {/* Body Skeleton */}
+              <View style={styles.cardImageContainer}>
+                <BodyView
+                  data={exercise.targetMuscles}
+                  gender="male"
+                  side={exercise.bodySide}
+                  scale={0.32}
+                  colors={['#F5A962', '#E9A45C']}
+                />
+              </View>
+              
               {/* Gradient Overlay */}
               <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.85)']}
                 style={styles.cardGradient}
               />
-              
-              {/* Selection Checkbox (Custom mode) */}
-              {!isSmartPlan && (
-                <View style={styles.checkboxWrapper}>
-                  <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                    {isSelected && <Check size={14} color="#000000" />}
-                  </View>
-                </View>
-              )}
 
               {/* Recommended Badge */}
               {exercise.isRecommended && (
@@ -335,7 +290,7 @@ export default function ExercisesScreen() {
               )}
               
               {/* Completed Overlay */}
-              {isSelected && isCompleted && (
+              {isCompleted && (
                 <View style={styles.completedOverlay}>
                   <View style={styles.checkCircle}>
                     <Check size={20} color="#000000" />
@@ -343,8 +298,8 @@ export default function ExercisesScreen() {
                 </View>
               )}
 
-              {/* Play Button (for selected, non-completed) */}
-              {isSelected && !isCompleted && (
+              {/* Play Button (for non-completed) */}
+              {!isCompleted && (
                 <View style={styles.playButtonWrapper}>
                   <View style={styles.playButton}>
                     <Play size={14} color="#000000" fill="#000000" />
@@ -357,7 +312,6 @@ export default function ExercisesScreen() {
                 <Text style={[
                   styles.cardTitle,
                   isCompleted && styles.cardTitleCompleted,
-                  !isSelected && styles.cardTitleUnselected,
                 ]}>{exercise.name}</Text>
                 <View style={styles.cardMeta}>
                   <View style={styles.metaItem}>
@@ -393,20 +347,18 @@ export default function ExercisesScreen() {
       </ScrollView>
 
       {/* Start Workout Button */}
-      {selectedCount > 0 && (
-        <View style={styles.bottomAction}>
-          <TouchableOpacity style={styles.startButton} activeOpacity={0.85}>
-            <Play size={20} color="#FFFFFF" fill="#FFFFFF" />
-            <Text style={styles.startButtonText}>
-              {completedCount > 0 && completedCount < selectedCount 
-                ? 'Continue Workout' 
-                : completedCount === selectedCount 
-                  ? 'Restart Workout' 
-                  : `Start ${selectedCount} Exercises`}
+      <View style={styles.bottomAction}>
+        <TouchableOpacity style={styles.startButton} activeOpacity={0.85}>
+          <Play size={20} color="#FFFFFF" fill="#FFFFFF" />
+          <Text style={styles.startButtonText}>
+            {completedCount > 0 && completedCount < totalCount 
+              ? 'Continue Workout' 
+              : completedCount === totalCount 
+                ? 'Restart Workout' 
+                : `Start ${totalCount} Exercises`}
             </Text>
           </TouchableOpacity>
         </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -474,34 +426,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#FFFFFF',
     padding: 0,
-  },
-  // Mode Toggle
-  modeToggleContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginBottom: 16,
-    gap: 12,
-  },
-  modeToggle: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1A1A1A',
-    borderRadius: 14,
-    height: 48,
-    gap: 8,
-  },
-  modeToggleActive: {
-    backgroundColor: '#CDFC00',
-  },
-  modeToggleText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666666',
-  },
-  modeToggleTextActive: {
-    color: '#000000',
   },
   // Categories
   categoryScroll: {
@@ -574,13 +498,21 @@ const styles = StyleSheet.create({
   gridCardRight: {
     marginLeft: CARD_GAP / 2,
   },
-  gridCardUnselected: {
-    opacity: 0.4,
+  cardBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
   },
-  cardImage: {
+  cardImageContainer: {
     width: '100%',
     height: '100%',
     position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1A1A1A',
   },
   cardGradient: {
     position: 'absolute',
@@ -588,26 +520,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '75%',
-  },
-  // Checkbox
-  checkboxWrapper: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: '#CDFC00',
-    borderColor: '#CDFC00',
   },
   // Recommended Badge
   recommendedBadge: {
