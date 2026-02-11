@@ -160,7 +160,7 @@ export default function WorkoutScreen() {
             key={workout.id} 
             style={styles.workoutCard}
             activeOpacity={0.9}
-            onPress={() => router.push(`/exercises/${workout.id}`)}
+            onPress={() => router.push(`/exercises/preference/${workout.id}`)}
           >
             {/* Card Background */}
             <View style={styles.cardBackground}>
@@ -175,6 +175,8 @@ export default function WorkoutScreen() {
                 <Path 
                   d="M16 0C7.163 0 0 7.163 0 16V115H145C153.837 115 162 123.163 162 132V144C162 152.837 169.163 160 178 160H327C335.837 160 343 152.837 343 144V16C343 7.163 335.837 0 327 0H16Z" 
                   fill={`url(#cardGrad-${index})`}
+                  stroke="#3A3A3A"
+                  strokeWidth="1"
                 />
               </Svg>
             </View>
@@ -187,7 +189,7 @@ export default function WorkoutScreen() {
                   gender="male"
                   side={workout.bodySide}
                   scale={0.38}
-                  colors={['#FF6B35', '#FFA726']}
+                  colors={['#86efac', '#E6FE58']}
                 />
               </View>
               
@@ -416,14 +418,14 @@ const styles = StyleSheet.create({
   // Start Button
   startButton: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
+    bottom: 1,
+    left: 1,
     backgroundColor: '#FF6B35',
     borderTopRightRadius: 16,
     borderBottomLeftRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 28,
-    minWidth: 120,
+    minWidth: 164,
     justifyContent: 'center',
     alignItems: 'center',
   },

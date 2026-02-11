@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { Slider } from '@miblanchard/react-native-slider';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -107,6 +108,38 @@ export default function AgeScreen() {
     router.push('/onboarding/fitnessLevel');
   };
 
+  // Slider thumb component for Android
+  const SliderThumb = () => (
+    <View style={styles.sliderThumb} />
+  );
+
+  // Android Slider UI
+  const renderAndroidSlider = () => (
+    <View style={styles.sliderWrapper}>
+      <View style={styles.sliderAgeDisplay}>
+        <Text style={styles.sliderAgeText}>{selectedAge}</Text>
+        <Text style={styles.sliderYearsLabel}>years old</Text>
+      </View>
+      <View style={styles.sliderContainer}>
+        <Slider
+          value={selectedAge}
+          onValueChange={value => setSelectedAge(Math.round(value[0]))}
+          minimumValue={MIN_AGE}
+          maximumValue={MAX_AGE}
+          step={1}
+          minimumTrackTintColor="#CDFC00"
+          maximumTrackTintColor="#333333"
+          renderThumbComponent={SliderThumb}
+          trackStyle={styles.sliderTrack}
+        />
+        <View style={styles.sliderLabels}>
+          <Text style={styles.sliderLabelText}>{MIN_AGE}</Text>
+          <Text style={styles.sliderLabelText}>{MAX_AGE}</Text>
+        </View>
+      </View>
+    </View>
+  );
+
   const renderItem = (age: number, index: number) => {
     const inputRange = [
       -(index + 2) * ITEM_HEIGHT,
@@ -182,36 +215,40 @@ export default function AgeScreen() {
             <Text style={styles.titleAccent}>age?</Text>
           </View>
 
-          {/* Picker */}
-          <View style={styles.pickerWrapper}>
-            <View style={styles.pickerContainer}>
-              {/* Selection Highlight */}
-              <View style={styles.selectionHighlight} />
-              
-              {/* Years label */}
-              <View style={styles.yearsLabelContainer}>
-                <Text style={styles.yearsLabel}>years old</Text>
-              </View>
+          {/* Picker - iOS uses wheel, Android uses slider */}
+          {Platform.OS === 'ios' ? (
+            <View style={styles.pickerWrapper}>
+              <View style={styles.pickerContainer}>
+                {/* Selection Highlight */}
+                <View style={styles.selectionHighlight} />
+                
+                {/* Years label */}
+                <View style={styles.yearsLabelContainer}>
+                  <Text style={styles.yearsLabel}>years old</Text>
+                </View>
 
-              {/* Wheel */}
-              <View style={styles.wheelContainer} {...panResponder.panHandlers}>
-                <Animated.View
-                  style={[
-                    styles.wheel,
-                    {
-                      transform: [{ translateY: scrollY }],
-                    },
-                  ]}
-                >
-                  {/* Top padding */}
-                  <View style={{ height: ITEM_HEIGHT * 2 }} />
-                  {ages.map((age, index) => renderItem(age, index))}
-                  {/* Bottom padding */}
-                  <View style={{ height: ITEM_HEIGHT * 2 }} />
-                </Animated.View>
+                {/* Wheel */}
+                <View style={styles.wheelContainer} {...panResponder.panHandlers}>
+                  <Animated.View
+                    style={[
+                      styles.wheel,
+                      {
+                        transform: [{ translateY: scrollY }],
+                      },
+                    ]}
+                  >
+                    {/* Top padding */}
+                    <View style={{ height: ITEM_HEIGHT * 2 }} />
+                    {ages.map((age, index) => renderItem(age, index))}
+                    {/* Bottom padding */}
+                    <View style={{ height: ITEM_HEIGHT * 2 }} />
+                  </Animated.View>
+                </View>
               </View>
             </View>
-          </View>
+          ) : (
+            renderAndroidSlider()
+          )}
 
           {/* Continue Button */}
           <TouchableOpacity
@@ -334,5 +371,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Averta-Bold',
     color: '#FFFFFF',
+  },
+  // Android Slider Styles
+  sliderWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  sliderAgeDisplay: {
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  sliderAgeText: {
+    fontSize: 72,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -2,
+  },
+  sliderYearsLabel: {
+    fontSize: 20,
+    color: '#666',
+    marginTop: 8,
+  },
+  sliderContainer: {
+    width: '100%',
+    paddingHorizontal: 8,
+  },
+  sliderTrack: {
+    height: 6,
+    borderRadius: 3,
+  },
+  sliderThumb: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#CDFC00',
+    shadowColor: '#CDFC00',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingHorizontal: 4,
+  },
+  sliderLabelText: {
+    fontSize: 14,
+    color: '#666',
   },
 });

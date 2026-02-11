@@ -107,40 +107,56 @@ const workoutData: Record<string, {
 };
 
 export default function ExercisesScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, mode } = useLocalSearchParams<{ id: string; mode?: string }>();
   const workout = workoutData[id || '1'];
+  const isSmartMode = mode === 'smart';
   
   // State - simplified
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
 
-  // Filter exercises based on search and category
-  const filteredExercises = useMemo(() => {
+  // Get exercises based on mode
+  const baseExercises = useMemo(() => {
     if (!workout) return [];
     
-    return workout.exercises.filter(exercise => {
+    if (isSmartMode) {
+      // Smart mode: Show recommended first, then others
+      const recommended = workout.exercises.filter(e => e.isRecommended);
+      const others = workout.exercises.filter(e => !e.isRecommended);
+      return [...recommended, ...others];
+    } else {
+      // Manual mode: Shuffle exercises randomly
+      return [...workout.exercises].sort(() => Math.random() - 0.5);
+    }
+  }, [workout, isSmartMode]);
+
+  // Filter exercises based on search and category
+  const filteredExercises = useMemo(() => {
+    return baseExercises.filter(exercise => {
       const matchesSearch = exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            exercise.muscleGroup.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || exercise.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [workout, searchQuery, selectedCategory]);
+  }, [baseExercises, searchQuery, selectedCategory]);
 
-  // Calculate stats
-  const totalCount = workout?.exercises.length || 0;
-  const completedCount = completedExercises.size;
+  // Calculate stats based on mode
+  const smartExercises = isSmartMode ? baseExercises.filter(e => e.isRecommended) : baseExercises;
+  const totalCount = smartExercises.length;
+  const completedCount = [...completedExercises].filter(id => 
+    smartExercises.some(e => e.id === id)
+  ).length;
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   
   // Calculate total duration
   const totalDuration = useMemo(() => {
-    if (!workout) return '0 min';
-    const totalMinutes = workout.exercises.reduce((acc, e) => {
+    const totalMinutes = smartExercises.reduce((acc, e) => {
       const mins = parseInt(e.duration) || 0;
       return acc + mins;
     }, 0);
     return `${totalMinutes} min`;
-  }, [workout]);
+  }, [smartExercises]);
 
   const toggleExerciseCompleted = (exerciseId: string) => {
     setCompletedExercises(prev => {
@@ -174,7 +190,15 @@ export default function ExercisesScreen() {
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleArea}>
-          <Text style={styles.headerTitle}>{workout.title}</Text>
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.headerTitle}>{workout.title}</Text>
+            {isSmartMode && (
+              <View style={styles.modeBadge}>
+                <Sparkles size={10} color="#000000" />
+                <Text style={styles.modeBadgeText}>Smart</Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.headerSubtitle}>{workout.subtitle}</Text>
         </View>
         <View style={styles.headerSpacer} />
@@ -394,10 +418,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Audiowide',
     color: '#FFFFFF',
+  },
+  modeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#CDFC00',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  modeBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#000000',
+    textTransform: 'uppercase',
   },
   headerSubtitle: {
     fontSize: 13,

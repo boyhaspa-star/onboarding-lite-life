@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CheckCircle2, ArrowRight } from 'lucide-react-native';
+import { CheckCircle2, ArrowRight, User, Sparkles } from 'lucide-react-native';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -13,8 +13,18 @@ import Animated, {
   Easing,
   useAnimatedReaction,
 } from 'react-native-reanimated';
+import AILoader from '@/components/AILoader';
+
+const profileSetupMessages = [
+  'Setting up your profile...',
+  'Analyzing your preferences...',
+  'Creating workout recommendations...',
+  'Personalizing your experience...',
+  'Almost ready...',
+];
 
 export default function CompleteScreen() {
+  const [isSettingUp, setIsSettingUp] = useState(false);
   const scale = useSharedValue(0);
 
   useEffect(() => {
@@ -32,8 +42,27 @@ export default function CompleteScreen() {
   });
 
   const handleGetStarted = () => {
+    setIsSettingUp(true);
+  };
+
+  const handleSetupComplete = () => {
     router.replace('/(tabs)');
   };
+
+  if (isSettingUp) {
+    return (
+      <SafeAreaView style={styles.loaderContainer} edges={['top', 'bottom']}>
+        <AILoader
+          title="Setting Up Your Profile"
+          messages={profileSetupMessages}
+          accentColor="#CDFC00"
+          icon={<Sparkles size={48} color="#CDFC00" />}
+          onComplete={handleSetupComplete}
+          duration={3500}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -121,6 +150,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
+  },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: '#0A0A0A',
   },
   content: {
     flex: 1,
