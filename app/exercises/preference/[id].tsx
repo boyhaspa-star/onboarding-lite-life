@@ -116,10 +116,11 @@ export default function PreferenceScreen() {
       <View style={styles.bodyPreview}>
         <BodyView
           data={workout.targetMuscles}
-          gender="male"
+          gender="female"
           side={workout.bodySide}
           scale={0.7}
-          colors={['#F5A962', '#E9A45C']}
+          // colors={['#F5A962', '#E9A45C']}
+          colors={['#CDFC00', '#CDFC00']}     
         />
       </View>
 

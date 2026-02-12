@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 28,
-    minWidth: 164,
+    minWidth: 162,
     justifyContent: 'center',
     alignItems: 'center',
   },
