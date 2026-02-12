@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,6 +14,9 @@ import Animated, {
   useAnimatedReaction,
 } from 'react-native-reanimated';
 import AILoader from '@/components/AILoader';
+import { colors, typography, spacing } from '@/constants/theme';
+import { ContinueButton, GlassCard } from '@/components';
+import { completeOnboarding } from '@/store/onboarding$';
 
 const profileSetupMessages = [
   'Setting up your profile...',
@@ -42,6 +45,8 @@ export default function CompleteScreen() {
   });
 
   const handleGetStarted = () => {
+    // Merge onboarding data → profile (synced to Supabase)
+    completeOnboarding();
     setIsSettingUp(true);
   };
 
@@ -55,8 +60,8 @@ export default function CompleteScreen() {
         <AILoader
           title="Setting Up Your Profile"
           messages={profileSetupMessages}
-          accentColor="#CDFC00"
-          icon={<Sparkles size={48} color="#CDFC00" />}
+          accentColor={colors.brand.primary}
+          icon={<Sparkles size={48} color={colors.brand.primary} />}
           onComplete={handleSetupComplete}
           duration={3500}
         />
@@ -82,7 +87,7 @@ export default function CompleteScreen() {
           <View style={styles.celebrationSection}>
             <Animated.View
               style={[styles.checkmarkContainer, animatedStyle]}>
-              <CheckCircle2 size={80} color="#22c55e" fill="#22c55e" />
+              <CheckCircle2 size={80} color={colors.brand.green} fill={colors.brand.green} />
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(300).duration(600)}>
@@ -133,13 +138,12 @@ export default function CompleteScreen() {
             </View>
           </Animated.View>
 
-          <TouchableOpacity
-            style={styles.startButton}
+          <ContinueButton
+            label="Let's Get Started"
             onPress={handleGetStarted}
-            activeOpacity={0.85}>
-            <Text style={styles.startButtonText}>Let's Get Started</Text>
-            <ArrowRight size={20} color="#000000" />
-          </TouchableOpacity>
+            variant="yellow"
+            icon={<ArrowRight size={20} color={colors.text.inverse} />}
+          />
         </View>
       </LinearGradient>
     </SafeAreaView>
@@ -149,16 +153,16 @@ export default function CompleteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: colors.background.pure,
   },
   loaderContainer: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: colors.background.primary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingHorizontal: spacing.screen.paddingHorizontalLg,
+    paddingVertical: spacing.lg,
     justifyContent: 'space-between',
   },
   header: {
@@ -166,39 +170,39 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: colors.background.surface,
     borderRadius: 2,
     marginBottom: 12,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#22c55e',
+    backgroundColor: colors.brand.green,
     borderRadius: 2,
   },
   pageIndicator: {
-    color: '#999999',
+    color: colors.text.muted,
     fontSize: 12,
     fontWeight: '500',
   },
   celebrationSection: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: spacing['5xl'],
   },
   checkmarkContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   celebrationTitle: {
     fontSize: 36,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: colors.text.primary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   celebrationSubtitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#999999',
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.muted,
     textAlign: 'center',
   },
   benefitsSection: {
@@ -208,19 +212,19 @@ const styles = StyleSheet.create({
   benefitCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: colors.overlay.white3,
     borderWidth: 1,
-    borderColor: '#333333',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    gap: 16,
+    borderColor: colors.gray[1200],
+    borderRadius: spacing.radius.md,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.lg,
   },
   benefitIcon: {
     width: 48,
     height: 48,
-    borderRadius: 12,
-    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    borderRadius: spacing.radius.md,
+    backgroundColor: colors.overlay.green15,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -233,36 +237,12 @@ const styles = StyleSheet.create({
   benefitTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   benefitDescription: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#999999',
-  },
-  startButton: {
-    backgroundColor: '#E6FE58',
-    borderRadius: 100,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-    shadowColor: '#E6FE58',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 16,
-  },
-  startButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.muted,
   },
 });

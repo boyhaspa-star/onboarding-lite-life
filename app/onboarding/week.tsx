@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { colors, typography, spacing } from '@/constants/theme';
+import { ProgressDots, ContinueButton, BackButton } from '@/components';
+import { onboarding$ } from '@/store/onboarding$';
 
 const days = [
   { id: 'sun', label: 'Sun', date: '01' },
@@ -30,6 +32,7 @@ export default function WeekScreen() {
   const handleContinue = () => {
     if (selectedDays.length > 0) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      onboarding$.availableDays.set(selectedDays);
       router.replace('/(tabs)');
     }
   };
@@ -42,17 +45,9 @@ export default function WeekScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <ChevronLeft size={28} color="#FFFFFF" />
-          </TouchableOpacity>
+          <BackButton variant="plain" onPress={handleBack} />
 
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={styles.progressDot} />
-          </View>
+          <ProgressDots total={5} active={4} />
         </View>
 
         <View style={styles.titleSection}>
@@ -97,22 +92,12 @@ export default function WeekScreen() {
         </View>
 
         <View style={styles.bottomSection}>
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              selectedDays.length === 0 && styles.continueButtonDisabled,
-            ]}
+          <ContinueButton
+            label="Complete Setup"
             onPress={handleContinue}
             disabled={selectedDays.length === 0}
-            activeOpacity={0.85}>
-            <Text
-              style={[
-                styles.continueButtonText,
-                selectedDays.length === 0 && styles.continueButtonTextDisabled,
-              ]}>
-              Complete Setup
-            </Text>
-          </TouchableOpacity>
+            variant="lime"
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -122,133 +107,93 @@ export default function WeekScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: colors.background.primary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 32,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    paddingTop: spacing.screen.paddingTop,
+    paddingBottom: spacing['3xl'],
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 40,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  progressContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginRight: 44,
-  },
-  progressDot: {
-    width: 32,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#333333',
-  },
-  progressDotActive: {
-    backgroundColor: '#CDFC00',
+    marginBottom: spacing['4xl'],
   },
   titleSection: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: spacing['5xl'],
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['6xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
     textAlign: 'center',
   },
   titleAccent: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#CDFC00',
+    fontSize: typography.fontSize['6xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.brand.primary,
     textAlign: 'center',
   },
   weekContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 32,
+    gap: spacing.sm,
+    marginBottom: spacing['3xl'],
   },
   dayColumn: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 4,
-    backgroundColor: '#333333',
-    borderRadius: 20,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xs,
+    backgroundColor: colors.gray[1200],
+    borderRadius: spacing.radius.xl,
   },
   dayColumnSelected: {
-    backgroundColor: '#CDFC00',
+    backgroundColor: colors.brand.primary,
   },
   dayLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   dayLabelSelected: {
-    color: '#000000',
+    color: colors.text.inverse,
   },
   dateContainer: {
-    width: 44,
-    height: 44,
-    backgroundColor: '#1F1F1F',
-    borderRadius: 22,
+    width: spacing.iconButton,
+    height: spacing.iconButton,
+    backgroundColor: colors.background.elevated,
+    borderRadius: spacing.iconButton / 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
   dateContainerSelected: {
-    backgroundColor: '#000000',
+    backgroundColor: colors.text.inverse,
   },
   dateText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#C3C3C3',
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   dateTextSelected: {
-    color: '#FFFFFF',
+    color: colors.text.primary,
   },
   infoSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: spacing['3xl'],
   },
   infoText: {
-    fontSize: 14,
-    color: '#666666',
+    fontSize: typography.fontSize.lg,
+    color: colors.text.disabled,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: typography.fontWeight.medium,
   },
   bottomSection: {
     marginTop: 'auto',
-  },
-  continueButton: {
-    backgroundColor: '#CDFC00',
-    borderRadius: 30,
-    paddingVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonDisabled: {
-    backgroundColor: '#2A2A2A',
-  },
-  continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  continueButtonTextDisabled: {
-    color: '#666666',
   },
 });

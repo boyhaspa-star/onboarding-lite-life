@@ -3,13 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Animated,
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { colors, typography, spacing } from '@/constants/theme';
+import { ProgressDots, ContinueButton, GlassCard } from '@/components';
+import { onboarding$ } from '@/store/onboarding$';
 
 type FitnessLevel = 'beginner' | 'intermediate' | 'advanced' | null;
 
@@ -65,6 +67,7 @@ export default function FitnessLevelScreen() {
   const handleContinue = () => {
     if (selectedLevel) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      onboarding$.fitnessLevel.set(selectedLevel as any);
       router.push('/onboarding/bodyParts');
     }
   };
@@ -76,13 +79,8 @@ export default function FitnessLevelScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        {/* Progress dots */}
-        <View style={styles.progressContainer}>
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={styles.progressDot} />
-        </View>
+        {/* Progress dots — shared component */}
+        <ProgressDots total={4} active={3} />
 
         {/* Title */}
         <View style={styles.titleSection}>
@@ -119,24 +117,13 @@ export default function FitnessLevelScreen() {
           })}
         </View>
 
-        {/* Bottom Button */}
+        {/* Bottom Button — shared component */}
         <View style={styles.bottomSection}>
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              !selectedLevel && styles.continueButtonDisabled,
-            ]}
+          <ContinueButton
+            label="Next"
             onPress={handleContinue}
             disabled={!selectedLevel}
-            activeOpacity={0.85}
-          >
-            <Text style={[
-              styles.continueButtonText,
-              !selectedLevel && styles.continueButtonTextDisabled,
-            ]}>
-              Next
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -146,90 +133,57 @@ export default function FitnessLevelScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background.surface,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 32,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 40,
-  },
-  progressDot: {
-    width: 32,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#333333',
-  },
-  progressDotActive: {
-    backgroundColor: '#CDFC00',
+    paddingHorizontal: spacing.screen.paddingHorizontalLg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing['3xl'],
   },
   titleSection: {
-    marginBottom: 32,
+    marginBottom: spacing['3xl'],
   },
   title: {
-    fontSize: 32,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['6xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
   },
   titleAccent: {
-    fontSize: 32,
-    fontFamily: 'Audiowide',
-    color: '#FF6B35',
+    fontSize: typography.fontSize['6xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.brand.cta,
   },
   cardsContainer: {
     flex: 1,
-    gap: 16,
+    gap: spacing.lg,
   },
   card: {
-    backgroundColor: 'rgba(60, 60, 60, 0.5)',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: colors.overlay.dark50,
+    borderRadius: spacing.radius.xl,
+    padding: spacing['2xl'],
     minHeight: 110,
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: colors.overlay.white10,
   },
   cardSelected: {
-    borderColor: '#CDFC00',
+    borderColor: colors.brand.primary,
     borderWidth: 2,
-    backgroundColor: 'rgba(205, 252, 0, 0.05)',
+    backgroundColor: colors.overlay.accent5,
   },
   cardTitle: {
-    fontSize: 20,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    fontSize: typography.fontSize['3xl'],
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   cardDescription: {
-    fontSize: 14,
-    fontFamily: 'Averta',
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: typography.fontSize.lg,
+    fontFamily: typography.fontFamily.body,
+    color: colors.overlay.white60,
   },
   bottomSection: {
-    marginTop: 24,
-  },
-  continueButton: {
-    backgroundColor: '#FF6B35',
-    borderRadius: 30,
-    paddingVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonDisabled: {
-    backgroundColor: '#3A3A3A',
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
-  },
-  continueButtonTextDisabled: {
-    color: '#666666',
+    marginTop: spacing['2xl'],
   },
 });

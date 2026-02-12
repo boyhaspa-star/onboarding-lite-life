@@ -4,128 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Check } from 'lucide-react-native';
 import BodyView from 'react-native-body-highlighter';
+import { colors, typography, spacing } from '@/constants/theme';
+import { ProgressDots, ContinueButton } from '@/components';
+import { muscleGroups, getHighlightedPartsFromSelection } from '@/data/muscles';
+import { onboarding$ } from '@/store/onboarding$';
 
-type MuscleGroup = {
-  id: string;
-  name: string;
-  category: 'upper' | 'core' | 'lower';
-  side: 'front' | 'back' | 'both';
-  bodyParts: Array<{ slug: string; intensity: number; side?: 'left' | 'right' }>;
-};
-
-const muscleGroups: MuscleGroup[] = [
-  // Upper Body - Front
-  {
-    id: 'chest',
-    name: 'Chest',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'chest', intensity: 2 }],
-  },
-  {
-    id: 'shoulders',
-    name: 'Shoulders',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'deltoids', intensity: 2 }],
-  },
-  {
-    id: 'biceps',
-    name: 'Biceps',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'biceps', intensity: 2 }],
-  },
-  {
-    id: 'forearms',
-    name: 'Forearms',
-    category: 'upper',
-    side: 'front',
-    bodyParts: [{ slug: 'forearm', intensity: 2 }],
-  },
-  // Upper Body - Both
-  {
-    id: 'trapezius',
-    name: 'Traps',
-    category: 'upper',
-    side: 'both',
-    bodyParts: [{ slug: 'trapezius', intensity: 2 }],
-  },
-  // Upper Body - Back
-  {
-    id: 'triceps',
-    name: 'Triceps',
-    category: 'upper',
-    side: 'back',
-    bodyParts: [{ slug: 'triceps', intensity: 2 }],
-  },
-  {
-    id: 'upper-back',
-    name: 'Upper Back',
-    category: 'upper',
-    side: 'back',
-    bodyParts: [{ slug: 'upper-back', intensity: 2 }],
-  },
-  {
-    id: 'lower-back',
-    name: 'Lower Back',
-    category: 'upper',
-    side: 'back',
-    bodyParts: [{ slug: 'lower-back', intensity: 2 }],
-  },
-  // Core - Front
-  {
-    id: 'abs',
-    name: 'Abs',
-    category: 'core',
-    side: 'front',
-    bodyParts: [{ slug: 'abs', intensity: 2 }],
-  },
-  {
-    id: 'obliques',
-    name: 'Obliques',
-    category: 'core',
-    side: 'front',
-    bodyParts: [{ slug: 'obliques', intensity: 2 }],
-  },
-  // Lower Body - Front
-  {
-    id: 'quadriceps',
-    name: 'Quads',
-    category: 'lower',
-    side: 'front',
-    bodyParts: [{ slug: 'quadriceps', intensity: 2 }],
-  },
-  {
-    id: 'adductors',
-    name: 'Adductors',
-    category: 'lower',
-    side: 'front',
-    bodyParts: [{ slug: 'adductors', intensity: 2 }],
-  },
-  // Lower Body - Back
-  {
-    id: 'hamstrings',
-    name: 'Hamstrings',
-    category: 'lower',
-    side: 'back',
-    bodyParts: [{ slug: 'hamstring', intensity: 2 }],
-  },
-  {
-    id: 'glutes',
-    name: 'Glutes',
-    category: 'lower',
-    side: 'back',
-    bodyParts: [{ slug: 'gluteal', intensity: 2 }],
-  },
-  {
-    id: 'calves',
-    name: 'Calves',
-    category: 'lower',
-    side: 'both',
-    bodyParts: [{ slug: 'calves', intensity: 2 }],
-  },
-];
+type MuscleGroup = typeof muscleGroups[number];
 
 export default function BodyPartsScreen() {
   const [selectedMuscles, setSelectedMuscles] = useState<Set<string>>(new Set());
@@ -146,13 +30,7 @@ export default function BodyPartsScreen() {
   };
 
   const getHighlightedParts = () => {
-    const parts: Array<{ slug: string; intensity: number; side?: 'left' | 'right' }> = [];
-    muscleGroups.forEach((group) => {
-      if (selectedMuscles.has(group.id)) {
-        parts.push(...group.bodyParts);
-      }
-    });
-    return parts;
+    return getHighlightedPartsFromSelection(selectedMuscles);
   };
 
   const groupedMuscles = {
@@ -163,6 +41,7 @@ export default function BodyPartsScreen() {
 
   const handleContinue = () => {
     if (selectedMuscles.size > 0) {
+      onboarding$.targetMuscleGroups.set(Array.from(selectedMuscles));
       router.push('/onboarding/week');
     }
   };
@@ -182,7 +61,7 @@ export default function BodyPartsScreen() {
           selectedMuscles.has(muscle.id) && styles.checkboxSelected,
         ]}>
         {selectedMuscles.has(muscle.id) && (
-          <Check size={12} color="#000000" strokeWidth={3} />
+          <Check size={12} color={colors.text.inverse} strokeWidth={3} />
         )}
       </View>
       <Text
@@ -198,13 +77,8 @@ export default function BodyPartsScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.mainContainer}>
-        {/* Progress dots */}
-        <View style={styles.progressContainer}>
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-          <View style={[styles.progressDot, styles.progressDotActive]} />
-        </View>
+        {/* Progress dots — shared component */}
+        <ProgressDots total={4} active={4} />
 
         <View style={styles.titleSection}>
           <Text style={styles.title}>Target</Text>
@@ -238,7 +112,7 @@ export default function BodyPartsScreen() {
                 gender="male"
                 side={viewSide}
                 scale={1.2}
-                colors={['#86efac', '#E6FE58']}
+                colors={[colors.brand.green, colors.brand.primaryAlt]}
               />
             </View>
 
@@ -258,19 +132,11 @@ export default function BodyPartsScreen() {
           <Text style={styles.selectionCount}>
             {selectedMuscles.size} {selectedMuscles.size === 1 ? 'area' : 'areas'} selected
           </Text>
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              selectedMuscles.size === 0 && styles.continueButtonDisabled,
-            ]}
+          <ContinueButton
+            label="Next"
             onPress={handleContinue}
             disabled={selectedMuscles.size === 0}
-            activeOpacity={0.85}>
-            <Text style={[
-              styles.continueButtonText,
-              selectedMuscles.size === 0 && styles.continueButtonTextDisabled
-            ]}>Next</Text>
-          </TouchableOpacity>
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -280,46 +146,30 @@ export default function BodyPartsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background.surface,
   },
   mainContainer: {
     flex: 1,
   },
-  progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    paddingTop: 16,
-    marginBottom: 32,
-  },
-  progressDot: {
-    width: 32,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#333333',
-  },
-  progressDotActive: {
-    backgroundColor: '#CDFC00',
-  },
   titleSection: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 28,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['5xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
   },
   titleAccent: {
-    fontSize: 28,
-    fontFamily: 'Audiowide',
-    color: '#FF6B35',
+    fontSize: typography.fontSize['5xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.brand.cta,
   },
   content: {
     flex: 1,
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
   },
   leftPanel: {
     flex: 1,
@@ -328,53 +178,53 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   categorySection: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   categoryTitle: {
-    color: '#666666',
-    fontSize: 10,
-    fontFamily: 'Averta-Bold',
+    color: colors.text.disabled,
+    fontSize: typography.fontSize.xs,
+    fontFamily: typography.fontFamily.bodyBold,
     letterSpacing: 1,
-    marginBottom: 6,
-    marginLeft: 4,
+    marginBottom: spacing.xs + 2,
+    marginLeft: spacing.xs,
   },
   muscleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#2a2a2a',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 6,
+    borderColor: colors.border.subtle,
+    borderRadius: spacing.radius.xl,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.xs + 2,
   },
   muscleButtonSelected: {
-    borderColor: '#CDFC00',
-    backgroundColor: 'rgba(205, 252, 0, 0.1)',
+    borderColor: colors.brand.primary,
+    backgroundColor: colors.overlay.accent10,
   },
   checkbox: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: '#555555',
-    marginRight: 8,
+    borderColor: colors.gray[900],
+    marginRight: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxSelected: {
-    backgroundColor: '#CDFC00',
-    borderColor: '#CDFC00',
+    backgroundColor: colors.brand.primary,
+    borderColor: colors.brand.primary,
   },
   muscleText: {
-    color: '#cccccc',
-    fontSize: 13,
-    fontFamily: 'Averta',
+    color: colors.gray[200],
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.body,
   },
   muscleTextSelected: {
-    color: '#ffffff',
-    fontFamily: 'Averta-Bold',
+    color: colors.text.primary,
+    fontFamily: typography.fontFamily.bodyBold,
   },
   rightPanel: {
     flex: 1,
@@ -389,55 +239,36 @@ const styles = StyleSheet.create({
   },
   rotateButton: {
     position: 'absolute',
-    bottom: 8,
+    bottom: spacing.sm,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(205, 252, 0, 0.15)',
+    backgroundColor: colors.overlay.accent15,
     borderWidth: 1,
-    borderColor: '#CDFC00',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    gap: 6,
+    borderColor: colors.brand.primary,
+    borderRadius: spacing.radius.xl,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg - 2,
+    gap: spacing.xs + 2,
   },
   rotateEmoji: {
-    fontSize: 14,
+    fontSize: typography.fontSize.lg,
   },
   rotateText: {
-    color: '#CDFC00',
-    fontSize: 12,
-    fontFamily: 'Averta-Bold',
+    color: colors.brand.primary,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.bodyBold,
   },
   buttonContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    paddingTop: 12,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    paddingBottom: spacing.lg,
+    paddingTop: spacing.md,
   },
   selectionCount: {
-    color: '#999999',
-    fontSize: 12,
-    fontFamily: 'Averta',
+    color: colors.text.muted,
+    fontSize: typography.fontSize.md,
+    fontFamily: typography.fontFamily.body,
     textAlign: 'center',
-    marginBottom: 12,
-  },
-  continueButton: {
-    backgroundColor: '#FF6B35',
-    borderRadius: 30,
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  continueButtonDisabled: {
-    backgroundColor: '#3A3A3A',
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
-  },
-  continueButtonTextDisabled: {
-    color: '#666666',
+    marginBottom: spacing.md,
   },
 });

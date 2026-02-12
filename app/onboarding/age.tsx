@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Animated,
   PanResponder,
   Dimensions,
@@ -14,6 +13,9 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Slider } from '@miblanchard/react-native-slider';
+import { colors, typography, spacing } from '@/constants/theme';
+import { ProgressDots, ContinueButton } from '@/components';
+import { onboarding$ } from '@/store/onboarding$';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -105,6 +107,7 @@ export default function AgeScreen() {
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onboarding$.age.set(selectedAge);
     router.push('/onboarding/fitnessLevel');
   };
 
@@ -127,8 +130,8 @@ export default function AgeScreen() {
           minimumValue={MIN_AGE}
           maximumValue={MAX_AGE}
           step={1}
-          minimumTrackTintColor="#CDFC00"
-          maximumTrackTintColor="#333333"
+          minimumTrackTintColor={colors.brand.primary}
+          maximumTrackTintColor={colors.gray[1200]}
           renderThumbComponent={SliderThumb}
           trackStyle={styles.sliderTrack}
         />
@@ -201,13 +204,8 @@ export default function AgeScreen() {
         style={styles.container}
       >
         <View style={styles.content}>
-          {/* Progress dots */}
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={[styles.progressDot, styles.progressDotActive]} />
-            <View style={styles.progressDot} />
-            <View style={styles.progressDot} />
-          </View>
+          {/* Progress dots — shared component */}
+          <ProgressDots total={4} active={2} />
 
           {/* Title */}
           <View style={styles.titleSection}>
@@ -250,14 +248,8 @@ export default function AgeScreen() {
             renderAndroidSlider()
           )}
 
-          {/* Continue Button */}
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={handleContinue}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.continueButtonText}>Next</Text>
-          </TouchableOpacity>
+          {/* Continue Button — shared component */}
+          <ContinueButton label="Next" onPress={handleContinue} />
         </View>
       </LinearGradient>
     </SafeAreaView>
@@ -267,41 +259,26 @@ export default function AgeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background.surface,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 40,
-  },
-  progressDot: {
-    width: 32,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#333333',
-  },
-  progressDotActive: {
-    backgroundColor: '#CDFC00',
+    paddingHorizontal: spacing.screen.paddingHorizontalLg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing['4xl'],
   },
   titleSection: {
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
   },
   title: {
-    fontSize: 32,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['6xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
   },
   titleAccent: {
-    fontSize: 32,
-    fontFamily: 'Audiowide',
-    color: '#FF6B35',
+    fontSize: typography.fontSize['6xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.brand.cta,
   },
   pickerWrapper: {
     flex: 1,
@@ -320,9 +297,9 @@ const styles = StyleSheet.create({
     right: 0,
     height: ITEM_HEIGHT,
     borderWidth: 2.5,
-    borderColor: '#CDFC00',
-    borderRadius: 16,
-    backgroundColor: 'rgba(205, 252, 0, 0.08)',
+    borderColor: colors.brand.primary,
+    borderRadius: spacing.radius.lg,
+    backgroundColor: colors.overlay.accent8,
     zIndex: 1,
     pointerEvents: 'none',
   },
@@ -337,7 +314,7 @@ const styles = StyleSheet.create({
   },
   yearsLabel: {
     fontSize: 22,
-    color: '#666',
+    color: colors.text.disabled,
     fontWeight: '500',
   },
   wheelContainer: {
@@ -355,22 +332,8 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 56,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.text.primary,
     letterSpacing: -2,
-  },
-  continueButton: {
-    backgroundColor: '#FF6B35',
-    borderRadius: 30,
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
   },
   // Android Slider Styles
   sliderWrapper: {
@@ -386,12 +349,12 @@ const styles = StyleSheet.create({
   sliderAgeText: {
     fontSize: 72,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.text.primary,
     letterSpacing: -2,
   },
   sliderYearsLabel: {
     fontSize: 20,
-    color: '#666',
+    color: colors.text.disabled,
     marginTop: 8,
   },
   sliderContainer: {
@@ -406,8 +369,8 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#CDFC00',
-    shadowColor: '#CDFC00',
+    backgroundColor: colors.brand.primary,
+    shadowColor: colors.brand.primary,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 8,
@@ -421,6 +384,6 @@ const styles = StyleSheet.create({
   },
   sliderLabelText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.text.disabled,
   },
 });

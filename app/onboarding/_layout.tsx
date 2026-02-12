@@ -13,6 +13,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="fitnessLevel" />
       <Stack.Screen name="bodyParts" />
       <Stack.Screen name="week" />
+      <Stack.Screen name="complete" />
     </Stack>
   );
 }
