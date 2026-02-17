@@ -5,6 +5,8 @@ import { router } from 'expo-router';
 import { Play, ArrowUp, Dumbbell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Video, ResizeMode } from 'expo-av';
+import * as Haptics from 'expo-haptics';
+import { colors } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -13,6 +15,7 @@ export default function LandingScreen() {
   const videoRef = useRef<Video>(null);
 
   const handleGetStarted = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/onboarding/gender');
   };
 
@@ -253,7 +256,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   betterContainer: {
-    backgroundColor: '#E6FE58',
+    backgroundColor: colors.brand.cta,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -261,7 +264,7 @@ const styles = StyleSheet.create({
   betterText: {
     fontSize: 36,
     fontFamily: 'Audiowide',
-    color: '#000000',
+    color: colors.text.inverse,
     letterSpacing: -0.5,
   },
   descriptionText: {
@@ -282,7 +285,7 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     flex: 1,
-    backgroundColor: '#E6FE58',
+    backgroundColor: colors.brand.cta,
     borderRadius: 100,
     paddingVertical: 14,
     justifyContent: 'center',
@@ -291,7 +294,7 @@ const styles = StyleSheet.create({
   signInButtonText: {
     fontSize: 14,
     fontFamily: 'Averta-Bold',
-    color: '#000000',
+    color: colors.text.inverse,
     letterSpacing: 0.5,
   },
   signUpButton: {

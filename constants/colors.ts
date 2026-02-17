@@ -8,6 +8,7 @@
 export const brand = {
   primary: '#CDFC00',       // Lime accent — buttons, highlights, active states
   primaryAlt: '#E6FE58',    // Yellow-green — landing page, birthday
+  primaryDark: '#373E16',   // Dark lime — progress circle track
   cta: '#FF6B35',           // Orange — action buttons (Start workout)
   blue: '#307FF2',          // Blue — play button on landing
   green: '#22c55e',         // Green — success, birthday highlight
@@ -49,6 +50,7 @@ export const text = {
   muted: '#999999',
   subtle: '#888888',
   disabled: '#666666',
+  inverse: '#000000',
   accent: brand.primary,
   cta: brand.cta,
 } as const;

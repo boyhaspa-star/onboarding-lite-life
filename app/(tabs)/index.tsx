@@ -2,9 +2,11 @@ import { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronRight, Search, Bell } from 'lucide-react-native';
-import Svg, { Circle, Text as SvgText, Defs, LinearGradient, Stop, Rect, Path, ClipPath, G, Mask } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Stop, Rect, Path } from 'react-native-svg';
 import PagerView from 'react-native-pager-view';
 import StackIcon from '@/components/icons/StackIcon';
+import { ProgressRing } from '@/components';
+import { colors, typography, spacing } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -66,10 +68,10 @@ export default function HomeScreen() {
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.iconButton}>
-              <Search size={22} color="#FFFFFF" />
+              <Search size={22} color={colors.text.primary} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>
-              <Bell size={22} color="#FFFFFF" />
+              <Bell size={22} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -147,36 +149,7 @@ export default function HomeScreen() {
               
               {/* Progress Circle - Lime Green */}
               <View style={styles.progressCircle}>
-                <Svg width={70} height={70} viewBox="0 0 70 70">
-                  <Circle
-                    cx="35"
-                    cy="35"
-                    r="28"
-                    fill="none"
-                    stroke="#373E16"
-                    strokeWidth="5"
-                  />
-                  <Circle
-                    cx="35"
-                    cy="35"
-                    r="28"
-                    fill="none"
-                    stroke="#CDFC00"
-                    strokeWidth="5"
-                    strokeDasharray={`${176 * (completionPercentage / 100)} 176`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 35 35)"
-                  />
-                  <SvgText
-                    x="35"
-                    y="40"
-                    textAnchor="middle"
-                    fontSize="16"
-                    fontWeight="600"
-                    fill="#FFFFFF">
-                    {completionPercentage}%
-                  </SvgText>
-                </Svg>
+                <ProgressRing percentage={completionPercentage} />
               </View>
             </View>
             
@@ -232,7 +205,7 @@ export default function HomeScreen() {
                 {item.image && (
                   <Image
                     source={item.image}
-                    style={[styles.goalExerciseImage, item.imageStyle]}
+                    style={[styles.goalExerciseImage, item.imageStyle as any]}
                     resizeMode="contain"
                   />
                 )}
@@ -252,36 +225,7 @@ export default function HomeScreen() {
                     
                     {/* Progress Circle */}
                     <View style={styles.goalProgressCircle}>
-                      <Svg width={70} height={70} viewBox="0 0 70 70">
-                        <Circle
-                          cx="35"
-                          cy="35"
-                          r="28"
-                          fill="none"
-                          stroke="#373E16"
-                          strokeWidth="5"
-                        />
-                        <Circle
-                          cx="35"
-                          cy="35"
-                          r="28"
-                          fill="none"
-                          stroke="#CDFC00"
-                          strokeWidth="5"
-                          strokeDasharray={`${176 * (item.progress / 100)} 176`}
-                          strokeLinecap="round"
-                          transform="rotate(-90 35 35)"
-                        />
-                        <SvgText
-                          x="35"
-                          y="40"
-                          textAnchor="middle"
-                          fontSize="16"
-                          fontWeight="600"
-                          fill="#FFFFFF">
-                          {item.progress}%
-                        </SvgText>
-                      </Svg>
+                      <ProgressRing percentage={item.progress} />
                     </View>
                   </View>
                 </View>
@@ -316,94 +260,94 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: colors.background.primary,
+    paddingTop: spacing.screen.paddingTop,
   },
-  paddingTop: 8,
   mainContent: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginTop: 8,
-    marginBottom: 16,
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
   },
   weatherSection: {
     flex: 1,
   },
   temperature: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 4,
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
   },
   location: {
-    fontSize: 14,
-    color: '#999999',
+    fontSize: typography.fontSize.lg,
+    color: colors.text.muted,
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.md,
   },
   iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    width: spacing.iconButton,
+    height: spacing.iconButton,
+    borderRadius: spacing.iconButtonRadius,
+    backgroundColor: colors.overlay.white10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   weekContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 20,
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
   },
   dayColumn: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    backgroundColor: '#333333',
-    borderRadius: 24,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xs,
+    backgroundColor: colors.gray[1200],
+    borderRadius: spacing.radius['2xl'],
   },
   dayColumnActive: {
-    backgroundColor: '#CDFC00',
+    backgroundColor: colors.brand.primary,
   },
   dayLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
     marginBottom: 6,
   },
   dayLabelActive: {
-    color: '#000000',
+    color: colors.text.inverse,
   },
   dateBox: {
     width: 36,
     height: 36,
-    backgroundColor: '#1F1F1F',
+    backgroundColor: colors.background.elevated,
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
   dateBoxActive: {
-    backgroundColor: '#000000',
+    backgroundColor: colors.background.pure,
   },
   dateNumber: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#C3C3C3',
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.text.secondary,
   },
   dateNumberActive: {
-    color: '#FFFFFF',
+    color: colors.text.primary,
   },
   exerciseCard: {
     height: 186,
-    borderRadius: 20,
-    marginBottom: 24,
+    borderRadius: spacing.radius.xl,
+    marginBottom: spacing['2xl'],
     overflow: 'hidden',
     position: 'relative',
   },
@@ -416,7 +360,7 @@ const styles = StyleSheet.create({
   },
   exerciseCardContent: {
     flex: 1,
-    padding: 20,
+    padding: spacing.xl,
     justifyContent: 'space-between',
   },
   exerciseCardTop: {
@@ -430,46 +374,46 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stackIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(50, 50, 50, 0.8)',
+    width: spacing.iconButton,
+    height: spacing.iconButton,
+    borderRadius: spacing.iconButtonRadius,
+    backgroundColor: colors.overlay.dark80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   exerciseTitleSection: {
     flex: 1,
   },
   exerciseTitle: {
-    fontSize: 28,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['5xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
     lineHeight: 34,
   },
   progressCircle: {
-    width: 70,
-    height: 70,
+    width: spacing.iconContainerXl,
+    height: spacing.iconContainerXl,
     justifyContent: 'center',
     alignItems: 'center',
   },
   startWorkoutButton: {
-    backgroundColor: '#FF6B35',
-    borderRadius: 30,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    backgroundColor: colors.brand.cta,
+    borderRadius: spacing.radius['3xl'],
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
     alignSelf: 'flex-start',
   },
   startWorkoutText: {
-    fontSize: 16,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.xl,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    fontSize: typography.fontSize['3xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   goalSwiperContainer: {
     flex: 1,
@@ -479,14 +423,14 @@ const styles = StyleSheet.create({
   },
   goalCardPage: {
     flex: 1,
-    paddingRight: 16,
+    paddingRight: spacing.lg,
   },
   goalCard: {
     flex: 1,
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
-    borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
+    borderTopRightRadius: spacing.radius.xl,
+    borderBottomRightRadius: spacing.radius.xl,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -499,8 +443,8 @@ const styles = StyleSheet.create({
   },
   goalCardContent: {
     flex: 1,
-    padding: 20,
-    paddingBottom: 60,
+    padding: spacing.xl,
+    paddingBottom: spacing.iconContainerLg,
   },
   goalExerciseImage: {
     position: 'absolute',
@@ -517,68 +461,68 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   goalIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(50, 50, 50, 0.8)',
+    width: spacing.iconButton,
+    height: spacing.iconButton,
+    borderRadius: spacing.iconButtonRadius,
+    backgroundColor: colors.overlay.dark80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   goalEmoji: {
-    fontSize: 20,
+    fontSize: typography.fontSize['3xl'],
   },
   goalTitleSection: {
     flex: 1,
   },
   goalTitle: {
-    fontSize: 24,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['4xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
     lineHeight: 30,
   },
   goalProgressCircle: {
-    width: 70,
-    height: 70,
+    width: spacing.iconContainerXl,
+    height: spacing.iconContainerXl,
     justifyContent: 'center',
     alignItems: 'center',
   },
   goalStartButton: {
     position: 'absolute',
-    bottom: 16,
+    bottom: spacing.lg,
     left: 0,
-    backgroundColor: '#FF6B35',
-    borderTopRightRadius: 20,
+    backgroundColor: colors.brand.cta,
+    borderTopRightRadius: spacing.radius.xl,
     borderBottomRightRadius: 0,
     borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    borderBottomLeftRadius: spacing.radius.lg,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
     width: '52%',
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   goalStartButtonText: {
-    fontSize: 16,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.xl,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
   },
   indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
-    gap: 8,
+    paddingVertical: spacing.lg,
+    gap: spacing.sm,
   },
   indicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#333333',
+    width: spacing.sm,
+    height: spacing.sm,
+    borderRadius: spacing.xs,
+    backgroundColor: colors.gray[1200],
   },
   indicatorActive: {
-    backgroundColor: '#CDFC00',
-    width: 24,
+    backgroundColor: colors.brand.primary,
+    width: spacing['2xl'],
   },
 });

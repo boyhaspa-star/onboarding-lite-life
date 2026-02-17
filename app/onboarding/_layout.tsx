@@ -6,9 +6,9 @@ export default function OnboardingLayout() {
       screenOptions={{
         headerShown: false,
         animation: 'slide_from_right',
+        contentStyle: { backgroundColor: '#0A0A0A' },
       }}>
       <Stack.Screen name="gender" />
-      <Stack.Screen name="birthday" />
       <Stack.Screen name="age" />
       <Stack.Screen name="fitnessLevel" />
       <Stack.Screen name="bodyParts" />

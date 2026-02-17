@@ -1,14 +1,14 @@
 import { Tabs } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
 import HouseIcon from '@/components/icons/HouseIcon';
 import WeightIcon from '@/components/icons/WeightIcon';
 import AnalysisIcon from '@/components/icons/AnalysisIcon';
 import ProfileIcon from '@/components/icons/ProfileIcon';
-import { colors, spacing } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 
 export default function TabLayout() {
   return (
     <Tabs
+      sceneStyle={{ backgroundColor: '#0A0A0A' }}
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -27,9 +27,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ focused }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <HouseIcon width={24} height={24} color={focused ? colors.text.inverse : colors.tabBar.inactive} />
-            </View>
+            <HouseIcon width={24} height={24} color={focused ? colors.tabBar.active : colors.tabBar.inactive} />
           ),
         }}
       />
@@ -63,16 +61,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  iconContainer: {
-    width: spacing.iconContainer,
-    height: spacing.iconContainer,
-    borderRadius: spacing.iconContainer / 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconContainerActive: {
-    backgroundColor: colors.brand.primary,
-  },
-});

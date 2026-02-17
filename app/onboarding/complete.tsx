@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckCircle2, ArrowRight, User, Sparkles } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -45,6 +46,7 @@ export default function CompleteScreen() {
   });
 
   const handleGetStarted = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     // Merge onboarding data → profile (synced to Supabase)
     completeOnboarding();
     setIsSettingUp(true);
@@ -141,8 +143,7 @@ export default function CompleteScreen() {
           <ContinueButton
             label="Let's Get Started"
             onPress={handleGetStarted}
-            variant="yellow"
-            icon={<ArrowRight size={20} color={colors.text.inverse} />}
+            icon={<ArrowRight size={20} color={colors.text.primary} />}
           />
         </View>
       </LinearGradient>

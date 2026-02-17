@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { colors, typography, spacing } from '@/constants/theme';
 
 export type LoaderIconType = 'brain' | 'user' | 'dumbbell' | 'chart' | 'heart' | 'target' | 'rocket';
 
@@ -170,15 +171,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
-    backgroundColor: '#0A0A0A',
+    paddingHorizontal: spacing['4xl'],
+    backgroundColor: colors.background.primary,
   },
   iconContainer: {
     width: 140,
     height: 140,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: spacing['4xl'],
   },
   spinningRing: {
     position: 'absolute',
@@ -191,23 +192,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    fontSize: typography.fontSize['4xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
     textAlign: 'center',
   },
   message: {
     fontSize: 15,
-    color: '#888888',
+    color: colors.text.subtle,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: spacing['4xl'],
     height: 20,
   },
   progressBarContainer: {
     width: '100%',
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.overlay.white10,
     borderRadius: 2,
     overflow: 'hidden',
   },

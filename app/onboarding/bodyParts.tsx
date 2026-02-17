@@ -4,18 +4,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Check } from 'lucide-react-native';
 import BodyView from 'react-native-body-highlighter';
+import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '@/constants/theme';
 import { ProgressDots, ContinueButton } from '@/components';
 import { muscleGroups, getHighlightedPartsFromSelection } from '@/data/muscles';
 import { onboarding$ } from '@/store/onboarding$';
+import { useUserGender } from '@/hooks/useUserGender';
 
 type MuscleGroup = typeof muscleGroups[number];
 
 export default function BodyPartsScreen() {
+  const selectedGender = useUserGender();
   const [selectedMuscles, setSelectedMuscles] = useState<Set<string>>(new Set());
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
 
   const toggleMuscle = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const newSelected = new Set(selectedMuscles);
     if (newSelected.has(id)) {
       newSelected.delete(id);
@@ -26,6 +30,7 @@ export default function BodyPartsScreen() {
   };
 
   const toggleView = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setViewSide((prev) => (prev === 'front' ? 'back' : 'front'));
   };
 
@@ -41,6 +46,7 @@ export default function BodyPartsScreen() {
 
   const handleContinue = () => {
     if (selectedMuscles.size > 0) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       onboarding$.targetMuscleGroups.set(Array.from(selectedMuscles));
       router.push('/onboarding/week');
     }
@@ -109,7 +115,7 @@ export default function BodyPartsScreen() {
             <View style={styles.bodyViewContainer}>
               <BodyView
                 data={getHighlightedParts()}
-                gender="male"
+                gender={selectedGender}
                 side={viewSide}
                 scale={1.2}
                 colors={[colors.brand.green, colors.brand.primaryAlt]}

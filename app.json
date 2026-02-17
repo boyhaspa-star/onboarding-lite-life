@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "backgroundColor": "#0A0A0A"
+    },
+    "android": {
+      "backgroundColor": "#0A0A0A"
     },
     "web": {
       "bundler": "metro",

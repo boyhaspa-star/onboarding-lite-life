@@ -2,60 +2,17 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
-import { ChevronLeft, Sparkles, Shuffle, Brain, Zap, Target, Dumbbell } from 'lucide-react-native';
+import { Sparkles, Shuffle, Brain, Zap, Target, Dumbbell } from 'lucide-react-native';
 import Svg, { Defs, LinearGradient, Stop, Path } from 'react-native-svg';
-import BodyView, { ExtendedBodyPart } from 'react-native-body-highlighter';
+import BodyView from 'react-native-body-highlighter';
+import * as Haptics from 'expo-haptics';
 import AILoader from '@/components/AILoader';
+import { ScreenHeader, EmptyState } from '@/components';
+import { colors, typography, spacing } from '@/constants/theme';
+import { getWorkoutMeta } from '@/data/workouts';
+import { useUserGender } from '@/hooks/useUserGender';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Workout metadata
-const workoutMeta: Record<string, { title: string; subtitle: string; targetMuscles: ExtendedBodyPart[]; bodySide: 'front' | 'back' }> = {
-  '1': {
-    title: 'Full Body',
-    subtitle: 'Exercise',
-    targetMuscles: [
-      { slug: 'chest', intensity: 2 },
-      { slug: 'deltoids', intensity: 2 },
-      { slug: 'biceps', intensity: 2 },
-      { slug: 'abs', intensity: 2 },
-      { slug: 'quadriceps', intensity: 2 },
-    ],
-    bodySide: 'front',
-  },
-  '2': {
-    title: 'Chest & Arms',
-    subtitle: 'Strength',
-    targetMuscles: [
-      { slug: 'chest', intensity: 2 },
-      { slug: 'deltoids', intensity: 2 },
-      { slug: 'biceps', intensity: 2 },
-      { slug: 'triceps', intensity: 2 },
-    ],
-    bodySide: 'front',
-  },
-  '3': {
-    title: 'HIIT Cardio',
-    subtitle: 'Fat Burn',
-    targetMuscles: [
-      { slug: 'quadriceps', intensity: 2 },
-      { slug: 'calves', intensity: 2 },
-      { slug: 'abs', intensity: 2 },
-    ],
-    bodySide: 'front',
-  },
-  '4': {
-    title: 'Leg Day',
-    subtitle: 'Power',
-    targetMuscles: [
-      { slug: 'quadriceps', intensity: 2 },
-      { slug: 'hamstring', intensity: 2 },
-      { slug: 'gluteal', intensity: 2 },
-      { slug: 'calves', intensity: 2 },
-    ],
-    bodySide: 'back',
-  },
-};
 
 const loadingMessages = [
   'Analyzing your fitness profile...',
@@ -67,15 +24,32 @@ const loadingMessages = [
 
 export default function PreferenceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const workout = workoutMeta[id || '1'];
+  const userGender = useUserGender();
+  const workout = getWorkoutMeta(id || '1');
   
   const [isLoading, setIsLoading] = useState(false);
 
+  if (!workout) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <EmptyState
+          icon={<Dumbbell size={48} color={colors.brand.primary} />}
+          title="Workout not found"
+          subtitle="This workout may have been removed."
+          actionLabel="Go Back"
+          onAction={() => router.back()}
+        />
+      </SafeAreaView>
+    );
+  }
+
   const handleSmartPlan = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsLoading(true);
   };
 
   const handleManual = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push(`/exercises/${id}?mode=manual`);
   };
 
@@ -88,7 +62,7 @@ export default function PreferenceScreen() {
       <AILoader
         title="Customizing Your Plan"
         messages={loadingMessages}
-        icon={<Brain size={48} color="#CDFC00" />}
+        icon={<Brain size={48} color={colors.brand.primary} />}
         onComplete={handleSmartPlanComplete}
         duration={3000}
       />
@@ -98,29 +72,17 @@ export default function PreferenceScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          activeOpacity={0.7}>
-          <ChevronLeft size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <View style={styles.headerTitleArea}>
-          <Text style={styles.headerTitle}>{workout.title}</Text>
-          <Text style={styles.headerSubtitle}>{workout.subtitle}</Text>
-        </View>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title={workout.title} subtitle={workout.subtitle} />
 
       {/* Body Preview */}
       <View style={styles.bodyPreview}>
         <BodyView
           data={workout.targetMuscles}
-          gender="female"
+          gender={userGender}
           side={workout.bodySide}
           scale={0.7}
           // colors={['#F5A962', '#E9A45C']}
-          colors={['#CDFC00', '#CDFC00']}     
+          colors={[colors.brand.primary, colors.brand.primary]}     
         />
       </View>
 
@@ -141,13 +103,13 @@ export default function PreferenceScreen() {
             <Svg width="100%" height="100%" viewBox="0 0 343 140" preserveAspectRatio="none">
               <Defs>
                 <LinearGradient id="smartBorder" x1="0" y1="0" x2="343" y2="140">
-                  <Stop offset="0" stopColor="#CDFC00" stopOpacity="0.6" />
-                  <Stop offset="1" stopColor="#CDFC00" stopOpacity="0.1" />
+                  <Stop offset="0" stopColor={colors.brand.primary} stopOpacity="0.6" />
+                  <Stop offset="1" stopColor={colors.brand.primary} stopOpacity="0.1" />
                 </LinearGradient>
               </Defs>
               <Path
                 d="M16 0C7.163 0 0 7.163 0 16V124C0 132.837 7.163 140 16 140H327C335.837 140 343 132.837 343 124V16C343 7.163 335.837 0 327 0H16Z"
-                fill="rgba(205, 252, 0, 0.08)"
+                fill={colors.overlay.accent8}
                 stroke="url(#smartBorder)"
                 strokeWidth="1.5"
               />
@@ -157,7 +119,7 @@ export default function PreferenceScreen() {
           <View style={styles.optionContent}>
             <View style={styles.optionIconContainer}>
               <View style={styles.optionIconBg}>
-                <Sparkles size={28} color="#CDFC00" />
+                <Sparkles size={28} color={colors.brand.primary} />
               </View>
             </View>
             <View style={styles.optionTextArea}>
@@ -172,11 +134,11 @@ export default function PreferenceScreen() {
               </Text>
               <View style={styles.optionFeatures}>
                 <View style={styles.featureItem}>
-                  <Target size={12} color="#CDFC00" />
+                  <Target size={12} color={colors.brand.primary} />
                   <Text style={styles.featureText}>Personalized</Text>
                 </View>
                 <View style={styles.featureItem}>
-                  <Zap size={12} color="#CDFC00" />
+                  <Zap size={12} color={colors.brand.primary} />
                   <Text style={styles.featureText}>Optimized</Text>
                 </View>
               </View>
@@ -199,7 +161,7 @@ export default function PreferenceScreen() {
               </Defs>
               <Path
                 d="M16 0C7.163 0 0 7.163 0 16V124C0 132.837 7.163 140 16 140H327C335.837 140 343 132.837 343 124V16C343 7.163 335.837 0 327 0H16Z"
-                fill="rgba(255, 255, 255, 0.03)"
+                fill={colors.overlay.white3}
                 stroke="url(#manualBorder)"
                 strokeWidth="1"
               />
@@ -209,7 +171,7 @@ export default function PreferenceScreen() {
           <View style={styles.optionContent}>
             <View style={styles.optionIconContainer}>
               <View style={[styles.optionIconBg, styles.optionIconBgManual]}>
-                <Shuffle size={28} color="#888888" />
+                <Shuffle size={28} color={colors.text.subtle} />
               </View>
             </View>
             <View style={styles.optionTextArea}>
@@ -219,7 +181,7 @@ export default function PreferenceScreen() {
               </Text>
               <View style={styles.optionFeatures}>
                 <View style={styles.featureItem}>
-                  <Dumbbell size={12} color="#666666" />
+                  <Dumbbell size={12} color={colors.text.disabled} />
                   <Text style={[styles.featureText, styles.featureTextManual]}>Full Control</Text>
                 </View>
               </View>
@@ -234,41 +196,9 @@ export default function PreferenceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: colors.background.primary,
   },
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitleArea: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#666666',
-    marginTop: 2,
-  },
-  headerSpacer: {
-    width: 44,
-  },
+
   // Body Preview
   bodyPreview: {
     alignItems: 'center',
@@ -278,23 +208,23 @@ const styles = StyleSheet.create({
   },
   // Title
   titleSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    marginBottom: spacing['2xl'],
   },
   mainTitle: {
-    fontSize: 28,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize['5xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
     textAlign: 'center',
   },
   // Options
   optionsContainer: {
-    paddingHorizontal: 20,
-    gap: 16,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    gap: spacing.lg,
   },
   optionCard: {
     height: 140,
-    borderRadius: 16,
+    borderRadius: spacing.radius.lg,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -308,22 +238,22 @@ const styles = StyleSheet.create({
   optionContent: {
     flex: 1,
     flexDirection: 'row',
-    padding: 20,
-    gap: 16,
+    padding: spacing.xl,
+    gap: spacing.lg,
   },
   optionIconContainer: {
     justifyContent: 'center',
   },
   optionIconBg: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(205, 252, 0, 0.15)',
+    width: spacing.iconContainerLg,
+    height: spacing.iconContainerLg,
+    borderRadius: spacing.radius['3xl'],
+    backgroundColor: colors.overlay.accent15,
     justifyContent: 'center',
     alignItems: 'center',
   },
   optionIconBgManual: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: colors.overlay.white8,
   },
   optionTextArea: {
     flex: 1,
@@ -336,47 +266,47 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   optionTitle: {
-    fontSize: 20,
-    fontFamily: 'Audiowide',
-    color: '#CDFC00',
+    fontSize: typography.fontSize['3xl'],
+    fontFamily: typography.fontFamily.heading,
+    color: colors.brand.primary,
   },
   optionTitleManual: {
-    color: '#FFFFFF',
+    color: colors.text.primary,
     marginBottom: 6,
   },
   recommendedBadge: {
-    backgroundColor: 'rgba(205, 252, 0, 0.2)',
-    paddingHorizontal: 8,
+    backgroundColor: colors.overlay.accent20,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: spacing.radius.xs,
   },
   recommendedText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#CDFC00',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.brand.primary,
     textTransform: 'uppercase',
   },
   optionDescription: {
-    fontSize: 13,
-    color: '#888888',
-    lineHeight: 18,
+    fontSize: typography.fontSize.base,
+    color: colors.text.subtle,
+    lineHeight: typography.lineHeight.normal,
     marginBottom: 10,
   },
   optionFeatures: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.lg,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   featureText: {
-    fontSize: 11,
-    color: '#CDFC00',
-    fontWeight: '500',
+    fontSize: typography.fontSize.sm,
+    color: colors.brand.primary,
+    fontWeight: typography.fontWeight.medium,
   },
   featureTextManual: {
-    color: '#666666',
+    color: colors.text.disabled,
   },
 });

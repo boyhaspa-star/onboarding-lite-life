@@ -8,15 +8,15 @@
  *   - OnboardingContext helpers
  */
 
-import type { ExtendedBodyPart } from 'react-native-body-highlighter';
+import type { ExtendedBodyPart, Slug } from 'react-native-body-highlighter';
 
 // ─── Types ──────────────────────────────────────────────
 
 export type MuscleSide = 'front' | 'back' | 'both';
 export type MuscleCategory = 'upper' | 'core' | 'lower';
 
-export interface BodyPart {
-  slug: string;
+export interface BodyPart extends ExtendedBodyPart {
+  slug: Slug;
   intensity: number;
   side?: 'left' | 'right';
 }
@@ -65,7 +65,7 @@ export const muscleCategoryLabels: Record<MuscleCategory, string> = {
 /** Get body highlighter parts from a set of selected muscle group IDs */
 export function getHighlightedPartsFromSelection(
   selectedMuscles: Set<string>
-): BodyPart[] {
+): ExtendedBodyPart[] {
   const parts: BodyPart[] = [];
   muscleGroups.forEach((group) => {
     if (selectedMuscles.has(group.id)) {

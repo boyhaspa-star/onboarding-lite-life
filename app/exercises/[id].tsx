@@ -2,113 +2,26 @@ import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
-import { ChevronLeft, Play, Clock, Dumbbell, Check, Search, Sparkles, X } from 'lucide-react-native';
+import { Play, Clock, Dumbbell, Check, Search, Sparkles, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import BodyView, { ExtendedBodyPart } from 'react-native-body-highlighter';
+import BodyView from 'react-native-body-highlighter';
 import Svg, { Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
+import { colors, typography, spacing } from '@/constants/theme';
+import { getWorkoutById, exerciseCategoryFilters } from '@/data/workouts';
+import { CategoryPills, ScreenHeader, EmptyState } from '@/components';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { FadeInView } from '@/components/FadeInView';
+import { useUserGender } from '@/hooks/useUserGender';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_GAP = 14;
 const CARD_WIDTH = (SCREEN_WIDTH - 40 - CARD_GAP) / 2;
 
-// Exercise categories for filtering
-const exerciseCategories = [
-  { id: 'all', label: 'All' },
-  { id: 'warmup', label: 'Warm Up' },
-  { id: 'strength', label: 'Strength' },
-  { id: 'cardio', label: 'Cardio' },
-  { id: 'core', label: 'Core' },
-  { id: 'cooldown', label: 'Cool Down' },
-];
-
-// Workout data (in real app, this would come from a store/API)
-const workoutData: Record<string, {
-  id: string;
-  title: string;
-  subtitle: string;
-  duration: string;
-  calories: number;
-  exercises: Array<{
-    id: string;
-    name: string;
-    duration: string;
-    reps?: string;
-    targetMuscles: ExtendedBodyPart[];
-    bodySide: 'front' | 'back';
-    category: string;
-    muscleGroup: string;
-    isRecommended: boolean; // Based on user's onboarding body parts
-  }>;
-}> = {
-  '1': {
-    id: '1',
-    title: 'Full Body',
-    subtitle: 'Exercise',
-    duration: '45 min',
-    calories: 320,
-    exercises: [
-      { id: 'e1', name: 'Warm Up Jog', duration: '5 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
-      { id: 'e2', name: 'Push Ups', duration: '3 min', reps: '3 x 15', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
-      { id: 'e3', name: 'Squats', duration: '4 min', reps: '3 x 20', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Plank Hold', duration: '3 min', reps: '3 x 45s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'core', muscleGroup: 'abs', isRecommended: true },
-      { id: 'e5', name: 'Lunges', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
-      { id: 'e6', name: 'Burpees', duration: '4 min', reps: '3 x 10', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
-      { id: 'e7', name: 'Mountain Climbers', duration: '3 min', reps: '3 x 30s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: false },
-      { id: 'e8', name: 'Jumping Jacks', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
-      { id: 'e9', name: 'Tricep Dips', duration: '3 min', reps: '3 x 12', targetMuscles: [{ slug: 'triceps', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: false },
-      { id: 'e10', name: 'Cool Down Stretch', duration: '5 min', targetMuscles: [{ slug: 'hamstring', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'cooldown', muscleGroup: 'full', isRecommended: true },
-    ],
-  },
-  '2': {
-    id: '2',
-    title: 'Chest & Arms',
-    subtitle: 'Strength',
-    duration: '35 min',
-    calories: 280,
-    exercises: [
-      { id: 'e1', name: 'Arm Circles', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e2', name: 'Diamond Push Ups', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
-      { id: 'e3', name: 'Tricep Dips', duration: '4 min', reps: '3 x 15', targetMuscles: [{ slug: 'triceps', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e4', name: 'Bicep Curls', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'biceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e5', name: 'Wide Push Ups', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: false },
-      { id: 'e6', name: 'Shoulder Taps', duration: '3 min', reps: '3 x 20', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'shoulders', isRecommended: false },
-    ],
-  },
-  '3': {
-    id: '3',
-    title: 'HIIT Cardio',
-    subtitle: 'Fat Burn',
-    duration: '25 min',
-    calories: 350,
-    exercises: [
-      { id: 'e1', name: 'Jumping Jacks', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
-      { id: 'e2', name: 'Burpees', duration: '4 min', reps: '4 x 10', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: true },
-      { id: 'e3', name: 'High Knees', duration: '3 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Mountain Climbers', duration: '4 min', reps: '3 x 30s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: true },
-      { id: 'e5', name: 'Box Jumps', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
-      { id: 'e6', name: 'Sprint Intervals', duration: '5 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
-    ],
-  },
-  '4': {
-    id: '4',
-    title: 'Leg Day',
-    subtitle: 'Power',
-    duration: '40 min',
-    calories: 300,
-    exercises: [
-      { id: 'e1', name: 'Leg Swings', duration: '3 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e2', name: 'Goblet Squats', duration: '5 min', reps: '4 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e3', name: 'Walking Lunges', duration: '5 min', reps: '3 x 20', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Calf Raises', duration: '4 min', reps: '3 x 20', targetMuscles: [{ slug: 'calves', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e5', name: 'Glute Bridges', duration: '4 min', reps: '3 x 15', targetMuscles: [{ slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'glutes', isRecommended: false },
-      { id: 'e6', name: 'Wall Sit', duration: '3 min', reps: '3 x 45s', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
-    ],
-  },
-};
-
 export default function ExercisesScreen() {
   const { id, mode } = useLocalSearchParams<{ id: string; mode?: string }>();
-  const workout = workoutData[id || '1'];
+  const userGender = useUserGender();
+  const workout = getWorkoutById(id || '1');
   const isSmartMode = mode === 'smart';
   
   // State - simplified
@@ -159,6 +72,7 @@ export default function ExercisesScreen() {
   }, [smartExercises]);
 
   const toggleExerciseCompleted = (exerciseId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCompletedExercises(prev => {
       const newSet = new Set(prev);
       if (newSet.has(exerciseId)) {
@@ -173,7 +87,13 @@ export default function ExercisesScreen() {
   if (!workout) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Workout not found</Text>
+        <EmptyState
+          icon={<Search size={48} color={colors.brand.primary} />}
+          title="Workout not found"
+          subtitle="This workout may have been removed or doesn't exist."
+          actionLabel="Go Back"
+          onAction={() => router.back()}
+        />
       </SafeAreaView>
     );
   }
@@ -181,71 +101,44 @@ export default function ExercisesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <ChevronLeft size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <View style={styles.headerTitleArea}>
-          <View style={styles.headerTitleRow}>
-            <Text style={styles.headerTitle}>{workout.title}</Text>
-            {isSmartMode && (
-              <View style={styles.modeBadge}>
-                <Sparkles size={10} color="#000000" />
-                <Text style={styles.modeBadgeText}>Smart</Text>
-              </View>
-            )}
-          </View>
-          <Text style={styles.headerSubtitle}>{workout.subtitle}</Text>
-        </View>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader
+        title={workout.title}
+        subtitle={workout.subtitle}
+        titleRight={
+          isSmartMode ? (
+            <View style={styles.modeBadge}>
+              <Sparkles size={10} color={colors.text.inverse} />
+              <Text style={styles.modeBadgeText}>Smart</Text>
+            </View>
+          ) : undefined
+        }
+      />
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Search size={18} color="#666666" />
+          <Search size={18} color={colors.text.disabled} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search exercises..."
-            placeholderTextColor="#666666"
+            placeholderTextColor={colors.text.disabled}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <X size={18} color="#666666" />
+              <X size={18} color={colors.text.disabled} />
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       {/* Category Pills */}
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryScroll}
-        contentContainerStyle={styles.categoryContainer}
-      >
-        {exerciseCategories.map((category) => {
-          const isSelected = selectedCategory === category.id;
-          return (
-            <TouchableOpacity
-              key={category.id}
-              onPress={() => setSelectedCategory(category.id)}
-              activeOpacity={0.8}
-              style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
-            >
-              <Text style={[styles.categoryLabel, isSelected && styles.categoryLabelActive]}>
-                {category.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <CategoryPills
+        categories={exerciseCategoryFilters}
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
 
       {/* Stats Row */}
       <View style={styles.statsRow}>
@@ -267,13 +160,12 @@ export default function ExercisesScreen() {
           const isCompleted = completedExercises.has(exercise.id);
           
           return (
-            <TouchableOpacity 
-              key={exercise.id} 
+            <FadeInView key={exercise.id} index={index} stagger={60}>
+            <AnimatedPressable
               style={[
                 styles.gridCard,
                 index % 2 === 0 ? styles.gridCardLeft : styles.gridCardRight,
               ]}
-              activeOpacity={0.9}
               onPress={() => toggleExerciseCompleted(exercise.id)}
             >
               {/* Card Border */}
@@ -293,7 +185,7 @@ export default function ExercisesScreen() {
               <View style={styles.cardImageContainer}>
                 <BodyView
                   data={exercise.targetMuscles}
-                  gender="male"
+                  gender={userGender}
                   side={exercise.bodySide}
                   scale={0.32}
                   colors={['#F5A962', '#E9A45C']}
@@ -307,9 +199,16 @@ export default function ExercisesScreen() {
               />
 
               {/* Recommended Badge */}
-              {exercise.isRecommended && (
+              {exercise.isRecommended && !isSmartMode && (
                 <View style={styles.recommendedBadge}>
-                  <Sparkles size={10} color="#000000" />
+                  <Sparkles size={10} color={colors.text.inverse} />
+                </View>
+              )}
+
+              {/* Sequence Number (Smart Plan mode) */}
+              {isSmartMode && !isCompleted && (
+                <View style={styles.sequenceBadge}>
+                  <Text style={styles.sequenceText}>{index + 1}</Text>
                 </View>
               )}
               
@@ -317,16 +216,16 @@ export default function ExercisesScreen() {
               {isCompleted && (
                 <View style={styles.completedOverlay}>
                   <View style={styles.checkCircle}>
-                    <Check size={20} color="#000000" />
+                    <Check size={20} color={colors.text.inverse} />
                   </View>
                 </View>
               )}
 
-              {/* Play Button (for non-completed) */}
-              {!isCompleted && (
+              {/* Play Button (only in manual mode for non-completed) */}
+              {!isCompleted && !isSmartMode && (
                 <View style={styles.playButtonWrapper}>
                   <View style={styles.playButton}>
-                    <Play size={14} color="#000000" fill="#000000" />
+                    <Play size={14} color={colors.text.inverse} fill={colors.text.inverse} />
                   </View>
                 </View>
               )}
@@ -339,12 +238,12 @@ export default function ExercisesScreen() {
                 ]}>{exercise.name}</Text>
                 <View style={styles.cardMeta}>
                   <View style={styles.metaItem}>
-                    <Clock size={10} color={isCompleted ? '#CDFC00' : '#888888'} />
+                    <Clock size={10} color={isCompleted ? colors.brand.primary : colors.text.subtle} />
                     <Text style={styles.metaText}>{exercise.duration}</Text>
                   </View>
                   {exercise.reps && (
                     <View style={styles.metaItem}>
-                      <Dumbbell size={10} color={isCompleted ? '#CDFC00' : '#888888'} />
+                      <Dumbbell size={10} color={isCompleted ? colors.brand.primary : colors.text.subtle} />
                       <Text style={styles.metaText}>{exercise.reps}</Text>
                     </View>
                   )}
@@ -353,17 +252,18 @@ export default function ExercisesScreen() {
                   <Text style={styles.muscleTagText}>{exercise.muscleGroup}</Text>
                 </View>
               </View>
-            </TouchableOpacity>
+            </AnimatedPressable>
+            </FadeInView>
           );
         })}
         
         {/* Empty State */}
         {filteredExercises.length === 0 && (
-          <View style={styles.emptyState}>
-            <Search size={40} color="#333333" />
-            <Text style={styles.emptyStateText}>No exercises found</Text>
-            <Text style={styles.emptyStateSubtext}>Try a different search or category</Text>
-          </View>
+          <EmptyState
+            icon={<Search size={40} color={colors.gray[1200]} />}
+            title="No exercises found"
+            subtitle="Try a different search or category"
+          />
         )}
         
         {/* Bottom Spacing */}
@@ -373,7 +273,7 @@ export default function ExercisesScreen() {
       {/* Start Workout Button */}
       <View style={styles.bottomAction}>
         <TouchableOpacity style={styles.startButton} activeOpacity={0.85}>
-          <Play size={20} color="#FFFFFF" fill="#FFFFFF" />
+          <Play size={20} color={colors.text.primary} fill={colors.text.primary} />
           <Text style={styles.startButtonText}>
             {completedCount > 0 && completedCount < totalCount 
               ? 'Continue Workout' 
@@ -390,133 +290,66 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: colors.background.primary,
   },
-  errorText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 50,
-  },
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitleArea: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  headerTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
-  },
+
   modeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#CDFC00',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    gap: spacing.xs,
+    backgroundColor: colors.brand.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: spacing.radius.sm,
   },
   modeBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#000000',
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.inverse,
     textTransform: 'uppercase',
   },
-  headerSubtitle: {
-    fontSize: 13,
-    color: '#666666',
-    marginTop: 2,
-  },
-  headerSpacer: {
-    width: 44,
-  },
+
   // Search
   searchContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    marginBottom: spacing.lg,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1A1A1A',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    height: 48,
-    gap: 12,
+    backgroundColor: colors.background.surface,
+    borderRadius: spacing.radius.md,
+    paddingHorizontal: spacing.lg,
+    height: spacing.iconContainer,
+    gap: spacing.md,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#FFFFFF',
+    color: colors.text.primary,
     padding: 0,
   },
-  // Categories
-  categoryScroll: {
-    maxHeight: 44,
-    marginBottom: 16,
-  },
-  categoryContainer: {
-    paddingHorizontal: 20,
-    gap: 10,
-  },
-  categoryPill: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    backgroundColor: '#1A1A1A',
-    borderRadius: 20,
-  },
-  categoryPillActive: {
-    backgroundColor: '#CDFC00',
-  },
-  categoryLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#666666',
-  },
-  categoryLabelActive: {
-    color: '#000000',
-  },
+
   // Stats Row
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
+    marginBottom: spacing.lg,
   },
   statsText: {
-    fontSize: 14,
-    color: '#666666',
+    fontSize: typography.fontSize.lg,
+    color: colors.text.disabled,
   },
   statsHighlight: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: colors.text.primary,
+    fontWeight: typography.fontWeight.bold,
   },
   progressBadge: {
-    fontSize: 13,
-    fontFamily: 'Audiowide',
-    color: '#CDFC00',
+    fontSize: typography.fontSize.base,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.brand.primary,
   },
   // Grid Layout
   exerciseList: {
@@ -525,16 +358,16 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
     paddingBottom: 100,
   },
   gridCard: {
     width: CARD_WIDTH,
     height: CARD_WIDTH * 1.25,
-    borderRadius: 20,
+    borderRadius: spacing.radius.xl,
     overflow: 'hidden',
     marginBottom: CARD_GAP,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background.surface,
   },
   gridCardLeft: {
     marginRight: CARD_GAP / 2,
@@ -548,7 +381,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 10,
+    zIndex: spacing.zIndex.overlay,
   },
   cardImageContainer: {
     width: '100%',
@@ -556,7 +389,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background.surface,
   },
   cardGradient: {
     position: 'absolute',
@@ -568,26 +401,43 @@ const styles = StyleSheet.create({
   // Recommended Badge
   recommendedBadge: {
     position: 'absolute',
-    top: 12,
-    right: 12,
+    top: spacing.md,
+    right: spacing.md,
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#CDFC00',
+    backgroundColor: colors.brand.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  sequenceBadge: {
+    position: 'absolute',
+    top: spacing.md,
+    left: spacing.md,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.brand.cta,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  sequenceText: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
+  },
   completedOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(205, 252, 0, 0.25)',
+    backgroundColor: colors.overlay.accent25,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#CDFC00',
+    width: spacing.iconContainer,
+    height: spacing.iconContainer,
+    borderRadius: spacing['2xl'],
+    backgroundColor: colors.brand.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -601,10 +451,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   playButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FF6B35',
+    width: spacing.iconButton,
+    height: spacing.iconButton,
+    borderRadius: spacing.iconButtonRadius,
+    backgroundColor: colors.brand.cta,
     justifyContent: 'center',
     alignItems: 'center',
     paddingLeft: 2,
@@ -614,66 +464,47 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 14,
+    padding: spacing.lg,
   },
   cardTitle: {
-    fontSize: 14,
-    fontFamily: 'Audiowide',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.lg,
+    fontFamily: typography.fontFamily.heading,
+    color: colors.text.primary,
     marginBottom: 6,
   },
   cardTitleCompleted: {
-    color: '#CDFC00',
+    color: colors.brand.primary,
   },
   cardTitleUnselected: {
-    color: '#888888',
+    color: colors.text.subtle,
   },
   cardMeta: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   metaText: {
-    fontSize: 11,
-    color: '#888888',
-    fontWeight: '500',
+    fontSize: typography.fontSize.sm,
+    color: colors.text.subtle,
+    fontWeight: typography.fontWeight.medium,
   },
   muscleTag: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: colors.overlay.white12,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
     borderRadius: 10,
   },
   muscleTagText: {
-    fontSize: 10,
-    color: '#AAAAAA',
-    fontWeight: '500',
+    fontSize: typography.fontSize.xs,
+    color: colors.gray[400],
+    fontWeight: typography.fontWeight.medium,
     textTransform: 'capitalize',
-  },
-  // Empty State
-  emptyState: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyStateText: {
-    fontSize: 16,
-    fontFamily: 'Audiowide',
-    color: '#666666',
-    marginTop: 16,
-  },
-  emptyStateSubtext: {
-    fontSize: 13,
-    color: '#444444',
-    marginTop: 4,
   },
   // Bottom Action
   bottomAction: {
@@ -681,23 +512,23 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
     paddingBottom: 34,
-    paddingTop: 16,
-    backgroundColor: '#0A0A0A',
+    paddingTop: spacing.lg,
+    backgroundColor: colors.background.primary,
   },
   startButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF6B35',
-    borderRadius: 16,
+    backgroundColor: colors.brand.cta,
+    borderRadius: spacing.radius.lg,
     height: 56,
     gap: 10,
   },
   startButtonText: {
-    fontSize: 16,
-    fontFamily: 'Averta-Bold',
-    color: '#FFFFFF',
+    fontSize: typography.fontSize.xl,
+    fontFamily: typography.fontFamily.bodyBold,
+    color: colors.text.primary,
   },
 });

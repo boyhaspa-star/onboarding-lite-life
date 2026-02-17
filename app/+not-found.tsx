@@ -1,16 +1,23 @@
-import { Link, Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MapPinOff } from 'lucide-react-native';
+import { EmptyState } from '@/components';
+import { colors, typography, spacing } from '@/constants/theme';
 
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <View style={styles.container}>
-        <Text style={styles.text}>This screen doesn't exist.</Text>
-        <Link href="/" style={styles.link}>
-          <Text>Go to home screen!</Text>
-        </Link>
-      </View>
+      <Stack.Screen options={{ title: 'Oops!', headerShown: false }} />
+      <SafeAreaView style={styles.container}>
+        <EmptyState
+          icon={<MapPinOff size={56} color={colors.brand.primary} />}
+          title="Page not found"
+          subtitle="The screen you're looking for doesn't exist or has been moved."
+          actionLabel="Go Home"
+          onAction={() => router.replace('/')}
+        />
+      </SafeAreaView>
     </>
   );
 }
@@ -18,16 +25,6 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 600,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
+    backgroundColor: colors.background.primary,
   },
 });
