@@ -3,10 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Check } from 'lucide-react-native';
-import BodyView from 'react-native-body-highlighter';
 import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '@/constants/theme';
-import { ProgressDots, ContinueButton } from '@/components';
+import { ProgressDots, ContinueButton, AnimatedBodyView } from '@/components';
 import { muscleGroups, getHighlightedPartsFromSelection } from '@/data/muscles';
 import { onboarding$ } from '@/store/onboarding$';
 import { useUserGender } from '@/hooks/useUserGender';
@@ -113,7 +112,7 @@ export default function BodyPartsScreen() {
 
           <View style={styles.rightPanel}>
             <View style={styles.bodyViewContainer}>
-              <BodyView
+              <AnimatedBodyView
                 data={getHighlightedParts()}
                 gender={selectedGender}
                 side={viewSide}

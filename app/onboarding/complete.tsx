@@ -1,19 +1,10 @@
-import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Image, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CheckCircle2, ArrowRight, User, Sparkles } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  Easing,
-  useAnimatedReaction,
-} from 'react-native-reanimated';
 import AILoader from '@/components/AILoader';
 import { colors, typography, spacing } from '@/constants/theme';
 import { ContinueButton, GlassCard } from '@/components';
@@ -29,21 +20,53 @@ const profileSetupMessages = [
 
 export default function CompleteScreen() {
   const [isSettingUp, setIsSettingUp] = useState(false);
-  const scale = useSharedValue(0);
+  const scale = useRef(new Animated.Value(0)).current;
+  const fadeDown = useRef(new Animated.Value(0)).current;
+  const slideDown = useRef(new Animated.Value(-20)).current;
+  const fadeUp = useRef(new Animated.Value(0)).current;
+  const slideUp = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
-    scale.value = withSpring(1, {
+    // Checkmark spring scale
+    Animated.spring(scale, {
+      toValue: 1,
       damping: 10,
       mass: 1,
-      overshootClamping: false,
-    });
-  }, []);
+      useNativeDriver: true,
+    }).start();
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
+    // Title fade-in-down (delay 300ms)
+    Animated.parallel([
+      Animated.timing(fadeDown, {
+        toValue: 1,
+        duration: 600,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideDown, {
+        toValue: 0,
+        duration: 600,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Benefits fade-in-up (delay 500ms)
+    Animated.parallel([
+      Animated.timing(fadeUp, {
+        toValue: 1,
+        duration: 600,
+        delay: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideUp, {
+        toValue: 0,
+        duration: 600,
+        delay: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handleGetStarted = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -88,11 +111,11 @@ export default function CompleteScreen() {
 
           <View style={styles.celebrationSection}>
             <Animated.View
-              style={[styles.checkmarkContainer, animatedStyle]}>
+              style={[styles.checkmarkContainer, { transform: [{ scale }] }]}>
               <CheckCircle2 size={80} color={colors.brand.green} fill={colors.brand.green} />
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(300).duration(600)}>
+            <Animated.View style={{ opacity: fadeDown, transform: [{ translateY: slideDown }] }}>
               <Text style={styles.celebrationTitle}>You're all set!</Text>
               <Text style={styles.celebrationSubtitle}>
                 Your personalized workout plan is ready
@@ -101,8 +124,7 @@ export default function CompleteScreen() {
           </View>
 
           <Animated.View
-            style={styles.benefitsSection}
-            entering={FadeInUp.delay(500).duration(600)}>
+            style={[styles.benefitsSection, { opacity: fadeUp, transform: [{ translateY: slideUp }] }]}>
             <View style={styles.benefitCard}>
               <View style={styles.benefitIcon}>
                 <Text style={styles.benefitIconText}>💪</Text>
@@ -143,6 +165,7 @@ export default function CompleteScreen() {
           <ContinueButton
             label="Let's Get Started"
             onPress={handleGetStarted}
+            variant="orange"
             icon={<ArrowRight size={20} color={colors.text.primary} />}
           />
         </View>

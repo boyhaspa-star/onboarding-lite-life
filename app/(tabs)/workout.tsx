@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Bell } from 'lucide-react-native';
 import Svg, { Defs, LinearGradient, Stop, Path } from 'react-native-svg';
-import BodyView from 'react-native-body-highlighter';
 import { colors, typography, spacing } from '@/constants/theme';
+import { AnimatedBodyView } from '@/components';
 import { workoutPrograms, workoutCategoryFilters } from '@/data/workouts';
 import { ProgressRing, CategoryPills } from '@/components';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
@@ -76,7 +76,7 @@ export default function WorkoutScreen() {
             {/* Body Skeleton + Progress Ring Container */}
             <View style={styles.bodyAndProgressContainer}>
               <View style={styles.bodySkeletonContainer}>
-                <BodyView
+                <AnimatedBodyView
                   data={workout.targetMuscles}
                   gender={userGender}
                   side={workout.bodySide}

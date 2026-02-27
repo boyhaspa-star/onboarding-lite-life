@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Play, Clock, Dumbbell, Check, Search, Sparkles, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import BodyView from 'react-native-body-highlighter';
 import Svg, { Rect, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
+import { AnimatedBodyView } from '@/components';
 import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '@/constants/theme';
 import { getWorkoutById, exerciseCategoryFilters } from '@/data/workouts';
@@ -183,7 +183,7 @@ export default function ExercisesScreen() {
               
               {/* Body Skeleton */}
               <View style={styles.cardImageContainer}>
-                <BodyView
+                <AnimatedBodyView
                   data={exercise.targetMuscles}
                   gender={userGender}
                   side={exercise.bodySide}

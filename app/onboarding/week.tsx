@@ -96,7 +96,7 @@ export default function WeekScreen() {
             label="Complete Setup"
             onPress={handleContinue}
             disabled={selectedDays.length === 0}
-            variant="lime"
+            variant="orange"
           />
         </View>
       </View>

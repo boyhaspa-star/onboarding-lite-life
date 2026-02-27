@@ -25,3 +25,4 @@ export { WorkoutCardSkeleton, ExerciseCardSkeleton } from './SkeletonCard';
 // Animation
 export { AnimatedPressable } from './AnimatedPressable';
 export { FadeInView } from './FadeInView';
+export { default as AnimatedBodyView } from './AnimatedBodyView';

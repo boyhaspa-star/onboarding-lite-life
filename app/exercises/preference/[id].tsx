@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Sparkles, Shuffle, Brain, Zap, Target, Dumbbell } from 'lucide-react-native';
 import Svg, { Defs, LinearGradient, Stop, Path } from 'react-native-svg';
-import BodyView from 'react-native-body-highlighter';
 import * as Haptics from 'expo-haptics';
+import { AnimatedBodyView } from '@/components';
 import AILoader from '@/components/AILoader';
 import { ScreenHeader, EmptyState } from '@/components';
 import { colors, typography, spacing } from '@/constants/theme';
@@ -54,7 +54,7 @@ export default function PreferenceScreen() {
   };
 
   const handleSmartPlanComplete = () => {
-    router.replace(`/exercises/${id}?mode=smart`);
+    router.replace(`/exercises/plan/${id}`);
   };
 
   if (isLoading) {
@@ -76,13 +76,12 @@ export default function PreferenceScreen() {
 
       {/* Body Preview */}
       <View style={styles.bodyPreview}>
-        <BodyView
+        <AnimatedBodyView
           data={workout.targetMuscles}
           gender={userGender}
           side={workout.bodySide}
           scale={0.7}
-          // colors={['#F5A962', '#E9A45C']}
-          colors={[colors.brand.primary, colors.brand.primary]}     
+          colors={[colors.brand.primary, colors.brand.primary]}
         />
       </View>
 
