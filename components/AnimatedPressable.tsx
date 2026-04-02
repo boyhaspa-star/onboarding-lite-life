@@ -3,6 +3,8 @@ import { StyleProp, ViewStyle, Animated, Pressable } from 'react-native';
 
 interface AnimatedPressableProps {
   onPress?: () => void;
+  onPressIn?: () => void;
+  onPressOut?: () => void;
   /** Scale when pressed — default 0.96 (subtle) */
   scaleValue?: number;
   style?: StyleProp<ViewStyle>;
@@ -21,6 +23,8 @@ interface AnimatedPressableProps {
  */
 export function AnimatedPressable({
   onPress,
+  onPressIn,
+  onPressOut,
   scaleValue = 0.96,
   style,
   disabled = false,
@@ -28,26 +32,28 @@ export function AnimatedPressable({
 }: AnimatedPressableProps) {
   const scale = useRef(new Animated.Value(1)).current;
 
-  const onPressIn = useCallback(() => {
+  const handlePressIn = useCallback(() => {
     Animated.spring(scale, {
       toValue: scaleValue,
       useNativeDriver: true,
       damping: 15,
       stiffness: 200,
     }).start();
-  }, [scaleValue]);
+    onPressIn?.();
+  }, [onPressIn, scaleValue]);
 
-  const onPressOut = useCallback(() => {
+  const handlePressOut = useCallback(() => {
     Animated.spring(scale, {
       toValue: 1,
       useNativeDriver: true,
       damping: 15,
       stiffness: 200,
     }).start();
-  }, []);
+    onPressOut?.();
+  }, [onPressOut]);
 
   return (
-    <Pressable onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} disabled={disabled}>
+    <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut} disabled={disabled}>
       <Animated.View style={[style, { transform: [{ scale }] }]}>
         {children}
       </Animated.View>

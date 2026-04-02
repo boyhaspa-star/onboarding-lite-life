@@ -1,14 +1,13 @@
-import { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronRight, Search, Bell } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Search, Bell } from 'lucide-react-native';
 import Svg, { Defs, LinearGradient, Stop, Rect, Path } from 'react-native-svg';
 import PagerView from 'react-native-pager-view';
 import StackIcon from '@/components/icons/StackIcon';
 import { ProgressRing } from '@/components';
 import { colors, typography, spacing } from '@/constants/theme';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const days = [
   { id: 'sun', label: 'Sun', date: '01' },
@@ -56,6 +55,10 @@ export default function HomeScreen() {
   const completedExercises = 3;
   const completionPercentage = Math.round((completedExercises / exerciseCount) * 100);
 
+  const openWorkoutTab = () => {
+    router.push('/(tabs)/workout');
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.mainContent}>
@@ -63,14 +66,14 @@ export default function HomeScreen() {
         {/* Header with Weather and Actions */}
         <View style={styles.header}>
           <View style={styles.weatherSection}>
-            <Text style={styles.temperature}>18° Partly Cloudly</Text>
+            <Text style={styles.temperature}>18° Partly Cloudy</Text>
             <Text style={styles.location}>San Diego, California</Text>
           </View>
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.85}>
               <Search size={22} color={colors.text.primary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.85}>
               <Bell size={22} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
@@ -154,7 +157,12 @@ export default function HomeScreen() {
             </View>
             
             {/* Start Workout Button - Orange */}
-            <TouchableOpacity style={styles.startWorkoutButton} activeOpacity={0.85}>
+            <TouchableOpacity
+              style={styles.startWorkoutButton}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Start workout"
+              onPress={openWorkoutTab}>
               <Text style={styles.startWorkoutText}>Start workout</Text>
             </TouchableOpacity>
           </View>
@@ -231,7 +239,12 @@ export default function HomeScreen() {
                 </View>
                 
                 {/* Start Workout Button - Positioned in cutout */}
-                <TouchableOpacity style={styles.goalStartButton} activeOpacity={0.85}>
+                <TouchableOpacity
+                  style={styles.goalStartButton}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Start ${item.title} workout`}
+                  onPress={openWorkoutTab}>
                   <Text style={styles.goalStartButtonText}>Start workout</Text>
                 </TouchableOpacity>
               </View>
@@ -265,7 +278,7 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.screen.paddingHorizontal,
   },
   header: {
     flexDirection: 'row',

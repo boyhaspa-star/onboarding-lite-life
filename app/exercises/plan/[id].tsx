@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import Svg, { Defs, LinearGradient, Stop, Rect, Path } from 'react-native-svg';
-import { Settings, Play, Clock, Flame, ChevronLeft } from 'lucide-react-native';
+import { Settings, Play, Clock, Flame, ChevronLeft, Check } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '@/constants/theme';
 import { getWorkoutById } from '@/data/workouts';
+
+
 import { ProgressRing, AnimatedBodyView } from '@/components';
 import { FadeInView } from '@/components/FadeInView';
 import { useUserGender } from '@/hooks/useUserGender';
@@ -50,9 +52,12 @@ export default function WorkoutPlanScreen() {
     return null;
   }
 
-  // First 3 exercises for "Next Exercise" section
+  // First 3 exercises for "
+  // " section
   const upcomingExercises = workout.exercises.slice(0, 3);
   const totalMinutes = workout.duration;
+  
+  const kcalPerExercise = Math.round(workout.calories / workout.exercises.length);
 
   const handleStart = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -188,57 +193,65 @@ export default function WorkoutPlanScreen() {
           <Text style={styles.sectionTitle}>Next Exercise</Text>
         </FadeInView>
 
-        {upcomingExercises.map((exercise, index) => (
+        {upcomingExercises.map((exercise, index) => {
+          const isFirst = index === 0;
+          const isLast = index === upcomingExercises.length - 1;
+          return (
           <FadeInView key={exercise.id} index={index + 4} delay={500}>
             <View style={styles.exerciseRow}>
-              {/* Numbered circle */}
-              <View style={styles.exerciseNumber}>
-                <Text style={styles.exerciseNumberText}>{index + 1}</Text>
+              {/* Timeline */}
+              <View style={styles.timelineCol}>
+                {/* Status circle */}
+                <View style={[
+                  styles.timelineDot,
+                  isFirst && styles.timelineDotCompleted,
+                ]}>
+                  {isFirst && <Check size={14} color={colors.text.inverse} strokeWidth={3} />}
+                </View>
+                {/* Connecting line */}
+                {!isLast && (
+                  <View style={[
+                    styles.timelineLine,
+                    isFirst ? styles.timelineLineSolid : styles.timelineLineDashed,
+                  ]} />
+                )}
               </View>
 
-              {/* Exercise details */}
+              {/* Exercise Card */}
               <View style={styles.exerciseCard}>
-                <View style={styles.exerciseCardBg}>
-                  <Svg width="100%" height="100%" preserveAspectRatio="none">
-                    <Defs>
-                      <LinearGradient id={`exGrad-${index}`} x1="0" y1="0" x2="300" y2="100" gradientUnits="userSpaceOnUse">
-                        <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.06" />
-                        <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.02" />
-                      </LinearGradient>
-                    </Defs>
-                    <Rect x="0" y="0" width="100%" height="100%" rx="16" fill={`url(#exGrad-${index})`} />
-                    <Rect x="0.5" y="0.5" width="99%" height="99%" rx="15.5" stroke={colors.border.subtle} strokeWidth="1" fill="none" />
-                  </Svg>
+                {/* Thumbnail with body silhouette */}
+                <View style={styles.exerciseThumb}>
+                  <AnimatedBodyView
+                    data={exercise.targetMuscles}
+                    gender={userGender}
+                    side={exercise.bodySide}
+                    scale={0.22}
+                    colors={[colors.gray[600], colors.gray[500]]}
+                  />
                 </View>
 
-                <View style={styles.exerciseCardInner}>
-                  <View style={styles.exerciseCardContent}>
-                    <View style={styles.exerciseTop}>
-                      <Text style={styles.exerciseName}>{exercise.name}</Text>
-                      <Text style={styles.exerciseMeta}>
-                        {exercise.reps ? `${exercise.reps} · ` : ''}{exercise.duration}
-                      </Text>
-                    </View>
-                    <Text style={styles.exerciseDesc}>
-                      {getExerciseDescription(exercise.name)}
-                    </Text>
+                {/* Text content */}
+                <View style={styles.exerciseCardContent}>
+                  <View style={styles.exerciseNameRow}>
+                    <Text style={styles.exerciseName}>{exercise.name}</Text>
+                    {exercise.reps && (
+                      <Text style={styles.exerciseMetric}>{exercise.reps}</Text>
+                    )}
                   </View>
-
-                  {/* Exercise character visual */}
-                  <View style={styles.exerciseVisual}>
-                    <AnimatedBodyView
-                      data={exercise.targetMuscles}
-                      gender={userGender}
-                      side={exercise.bodySide}
-                      scale={0.22}
-                      colors={[colors.brand.primary, colors.brand.primaryAlt]}
-                    />
+                  <View style={styles.exerciseDetailRow}>
+                    <Flame size={14} color={colors.gray[700]} />
+                    <Text style={styles.exerciseDetailText}>{kcalPerExercise} kcal</Text>
+                  </View>
+                  <View style={styles.exerciseDetailRow}>
+                    <Clock size={14} color={colors.gray[700]} />
+                    <Text style={styles.exerciseDetailText}>{exercise.duration}</Text>
                   </View>
                 </View>
               </View>
             </View>
           </FadeInView>
-        ))}
+          );
+        })}
 
         {/* Bottom spacer for button */}
         <View style={{ height: 100 }} />
@@ -257,38 +270,6 @@ export default function WorkoutPlanScreen() {
       </View>
     </SafeAreaView>
   );
-}
-
-// ─── Exercise Descriptions ──────────────────────────────
-
-function getExerciseDescription(name: string): string {
-  const descriptions: Record<string, string> = {
-    'Warm Up Jog': 'Light jogging to increase heart rate and prepare muscles for the workout ahead.',
-    'Push Ups': 'Strengthening your chest, shoulders and triceps with controlled bodyweight movements.',
-    'Squats': 'Building lower body power by targeting quads, glutes and hamstrings effectively.',
-    'Plank Hold': 'Strengthening your core will help you to move more easily during everyday activities.',
-    'Lunges': 'Improving balance and strength through unilateral leg movements.',
-    'Burpees': 'Full-body cardio exercise combining squat, plank, and jump for maximum calorie burn.',
-    'Mountain Climbers': 'Dynamic core workout that builds endurance and strengthens hip flexors.',
-    'Jumping Jacks': 'Classic warm-up exercise to elevate heart rate and warm up the entire body.',
-    'Tricep Dips': 'Targeting the back of the arms with a focused bodyweight pressing movement.',
-    'Cool Down Stretch': 'Gentle stretching to improve flexibility and aid in muscle recovery.',
-    'Arm Circles': 'Warming up shoulder joints and improving mobility before upper body work.',
-    'Diamond Push Ups': 'Narrower hand placement shifts focus to triceps for greater arm definition.',
-    'Bicep Curls': 'Isolating the biceps for focused arm strengthening and development.',
-    'Wide Push Ups': 'Wider hand position emphasizes chest engagement for a broader pump.',
-    'Shoulder Taps': 'Building core stability while strengthening shoulders through anti-rotation work.',
-    'High Knees': 'Explosive cardio movement that targets quads and improves running mechanics.',
-    'Box Jumps': 'Plyometric exercise building explosive power in the lower body.',
-    'Sprint Intervals': 'Interval training is beneficial for both aerobic and anaerobic energy systems.',
-    'Leg Swings': 'Dynamic stretching for hip mobility and hamstring flexibility.',
-    'Goblet Squats': 'Front-loaded squat variation that improves depth and core engagement.',
-    'Walking Lunges': 'Combining movement with strength for functional lower body training.',
-    'Calf Raises': 'Isolated calf work to build ankle stability and lower leg strength.',
-    'Glute Bridges': 'Activating and strengthening the glutes while protecting the lower back.',
-    'Wall Sit': 'Isometric hold building endurance and strength in the quadriceps.',
-  };
-  return descriptions[name] || 'Strengthening your body through controlled, effective movements.';
 }
 
 // ─── Styles ─────────────────────────────────────────────
@@ -450,80 +431,100 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
 
+  // Timeline
+  timelineCol: {
+    alignItems: 'center',
+    width: 32,
+    paddingTop: spacing.lg,
+  },
+  timelineDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: colors.gray[700],
+    backgroundColor: colors.gray[700],
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timelineDotCompleted: {
+    borderColor: colors.brand.primary,
+    backgroundColor: colors.brand.primary,
+  },
+  timelineLine: {
+    flex: 1,
+    width: 2,
+    marginTop: 6,
+    marginBottom: -6,
+  },
+  timelineLineSolid: {
+    backgroundColor: colors.brand.primary,
+  },
+  timelineLineDashed: {
+    borderLeftWidth: 2,
+    borderLeftColor: colors.gray[1100],
+    borderStyle: 'dashed',
+    width: 0,
+  },
+
   // Exercise Row
   exerciseRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
     marginBottom: spacing.lg,
     gap: spacing.md,
   },
-  exerciseNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: colors.brand.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.lg,
-  },
-  exerciseNumberText: {
-    fontSize: typography.fontSize.lg,
-    fontFamily: typography.fontFamily.bodyBold,
-    color: colors.brand.primary,
-  },
   exerciseCard: {
     flex: 1,
-    borderRadius: spacing.radius.lg,
-    overflow: 'hidden',
-    position: 'relative',
-    minHeight: 100,
-  },
-  exerciseCardBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  exerciseCardContent: {
-    paddingVertical: spacing.md,
-    paddingLeft: spacing.lg,
-    paddingRight: spacing.xs,
-    flex: 1,
-  },
-  exerciseCardInner: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: colors.background.elevated,
+    borderRadius: spacing.radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+    padding: spacing.lg,
+    gap: spacing.lg,
   },
-  exerciseVisual: {
-    width: 65,
+  exerciseThumb: {
+    width: 90,
     height: 90,
+    borderRadius: spacing.radius.md,
+    backgroundColor: colors.background.muted,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: spacing.sm,
-    opacity: 0.6,
+    overflow: 'hidden',
   },
-  exerciseTop: {
+  exerciseCardContent: {
+    flex: 1,
+    gap: 6,
+  },
+  exerciseNameRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: 4,
   },
   exerciseName: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize['2xl'],
     fontFamily: typography.fontFamily.bodyBold,
     color: colors.text.primary,
+    flex: 1,
   },
-  exerciseMeta: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.disabled,
+  exerciseMetric: {
+    fontSize: typography.fontSize.lg,
+    color: colors.text.muted,
     fontWeight: typography.fontWeight.medium,
+    marginLeft: spacing.sm,
   },
-  exerciseDesc: {
-    fontSize: typography.fontSize.base,
-    color: colors.text.subtle,
-    lineHeight: typography.lineHeight.relaxed,
+  exerciseDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  exerciseDetailText: {
+    fontSize: typography.fontSize.lg,
+    color: colors.gray[600],
+    fontWeight: typography.fontWeight.medium,
   },
 
   // Bottom Bar

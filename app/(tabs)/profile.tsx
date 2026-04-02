@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import {
@@ -7,20 +7,20 @@ import {
 } from 'lucide-react-native';
 import { colors, typography, spacing } from '@/constants/theme';
 import { SettingsRow, SettingsSection } from '@/components/SettingsRow';
+import { MessageModal } from '@/components/MessageModal';
 
 export default function ProfileScreen() {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: () => router.replace('/'),
-      },
-    ]);
+    setShowSignOutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowSignOutModal(false);
+    router.replace('/');
   };
 
   return (
@@ -110,6 +110,19 @@ export default function ProfileScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      <MessageModal
+        visible={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
+        variant="error"
+        icon={<LogOut size={32} color="#EF4444" />}
+        title="Sign Out"
+        message="Are you sure you want to sign out? You'll need to log in again to access your workouts."
+        primaryLabel="Sign Out"
+        onPrimary={confirmLogout}
+        secondaryLabel="Cancel"
+        onSecondary={() => setShowSignOutModal(false)}
+      />
     </SafeAreaView>
   );
 }

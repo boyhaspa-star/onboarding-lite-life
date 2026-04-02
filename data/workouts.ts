@@ -11,11 +11,14 @@ import type { ExtendedBodyPart } from 'react-native-body-highlighter';
 
 export type WorkoutCategory = 'all' | 'upper' | 'core' | 'lower' | 'cardio';
 
+export type ExerciseDifficulty = 'Easy' | 'Medium' | 'Hard';
+
 export interface WorkoutExercise {
   id: string;
   name: string;
   duration: string;
   reps?: string;
+  difficulty: ExerciseDifficulty;
   targetMuscles: ExtendedBodyPart[];
   bodySide: 'front' | 'back';
   category: ExerciseFilterCategory;
@@ -89,16 +92,16 @@ export const workoutPrograms: WorkoutProgram[] = [
     ],
     bodySide: 'front',
     exercises: [
-      { id: 'e1', name: 'Warm Up Jog', duration: '5 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
-      { id: 'e2', name: 'Push Ups', duration: '3 min', reps: '3 x 15', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
-      { id: 'e3', name: 'Squats', duration: '4 min', reps: '3 x 20', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Plank Hold', duration: '3 min', reps: '3 x 45s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'core', muscleGroup: 'abs', isRecommended: true },
-      { id: 'e5', name: 'Lunges', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
-      { id: 'e6', name: 'Burpees', duration: '4 min', reps: '3 x 10', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
-      { id: 'e7', name: 'Mountain Climbers', duration: '3 min', reps: '3 x 30s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: false },
-      { id: 'e8', name: 'Jumping Jacks', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
-      { id: 'e9', name: 'Tricep Dips', duration: '3 min', reps: '3 x 12', targetMuscles: [{ slug: 'triceps', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: false },
-      { id: 'e10', name: 'Cool Down Stretch', duration: '5 min', targetMuscles: [{ slug: 'hamstring', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'cooldown', muscleGroup: 'full', isRecommended: true },
+      { id: 'e1', name: 'Warm Up Jog', duration: '5 min', difficulty: 'Easy', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
+      { id: 'e2', name: 'Push Ups', duration: '3 min', reps: '3 x 15', difficulty: 'Medium', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
+      { id: 'e3', name: 'Squats', duration: '4 min', reps: '3 x 20', difficulty: 'Medium', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e4', name: 'Plank Hold', duration: '3 min', reps: '3 x 45s', difficulty: 'Medium', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'core', muscleGroup: 'abs', isRecommended: true },
+      { id: 'e5', name: 'Lunges', duration: '4 min', reps: '3 x 12', difficulty: 'Easy', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e6', name: 'Burpees', duration: '4 min', reps: '3 x 10', difficulty: 'Hard', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
+      { id: 'e7', name: 'Mountain Climbers', duration: '3 min', reps: '3 x 30s', difficulty: 'Hard', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: false },
+      { id: 'e8', name: 'Jumping Jacks', duration: '3 min', difficulty: 'Easy', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: false },
+      { id: 'e9', name: 'Tricep Dips', duration: '3 min', reps: '3 x 12', difficulty: 'Medium', targetMuscles: [{ slug: 'triceps', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: false },
+      { id: 'e10', name: 'Cool Down Stretch', duration: '5 min', difficulty: 'Easy', targetMuscles: [{ slug: 'hamstring', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'cooldown', muscleGroup: 'full', isRecommended: true },
     ],
   },
   {
@@ -119,12 +122,12 @@ export const workoutPrograms: WorkoutProgram[] = [
     ],
     bodySide: 'front',
     exercises: [
-      { id: 'e1', name: 'Arm Circles', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e2', name: 'Diamond Push Ups', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
-      { id: 'e3', name: 'Tricep Dips', duration: '4 min', reps: '3 x 15', targetMuscles: [{ slug: 'triceps', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e4', name: 'Bicep Curls', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'biceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'arms', isRecommended: true },
-      { id: 'e5', name: 'Wide Push Ups', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: false },
-      { id: 'e6', name: 'Shoulder Taps', duration: '3 min', reps: '3 x 20', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'shoulders', isRecommended: false },
+      { id: 'e1', name: 'Arm Circles', duration: '3 min', difficulty: 'Easy', targetMuscles: [{ slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'arms', isRecommended: true },
+      { id: 'e2', name: 'Diamond Push Ups', duration: '4 min', reps: '3 x 12', difficulty: 'Hard', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'triceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: true },
+      { id: 'e3', name: 'Tricep Dips', duration: '4 min', reps: '3 x 15', difficulty: 'Medium', targetMuscles: [{ slug: 'triceps', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'arms', isRecommended: true },
+      { id: 'e4', name: 'Bicep Curls', duration: '4 min', reps: '3 x 12', difficulty: 'Easy', targetMuscles: [{ slug: 'biceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'arms', isRecommended: true },
+      { id: 'e5', name: 'Wide Push Ups', duration: '4 min', reps: '3 x 12', difficulty: 'Medium', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'deltoids', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'chest', isRecommended: false },
+      { id: 'e6', name: 'Shoulder Taps', duration: '3 min', reps: '3 x 20', difficulty: 'Medium', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'shoulders', isRecommended: false },
     ],
   },
   {
@@ -144,12 +147,12 @@ export const workoutPrograms: WorkoutProgram[] = [
     ],
     bodySide: 'front',
     exercises: [
-      { id: 'e1', name: 'Jumping Jacks', duration: '3 min', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
-      { id: 'e2', name: 'Burpees', duration: '4 min', reps: '4 x 10', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: true },
-      { id: 'e3', name: 'High Knees', duration: '3 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Mountain Climbers', duration: '4 min', reps: '3 x 30s', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: true },
-      { id: 'e5', name: 'Box Jumps', duration: '4 min', reps: '3 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
-      { id: 'e6', name: 'Sprint Intervals', duration: '5 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e1', name: 'Jumping Jacks', duration: '3 min', difficulty: 'Easy', targetMuscles: [{ slug: 'deltoids', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'full', isRecommended: true },
+      { id: 'e2', name: 'Burpees', duration: '4 min', reps: '4 x 10', difficulty: 'Hard', targetMuscles: [{ slug: 'chest', intensity: 2 }, { slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'full', isRecommended: true },
+      { id: 'e3', name: 'High Knees', duration: '3 min', difficulty: 'Medium', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'abs', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e4', name: 'Mountain Climbers', duration: '4 min', reps: '3 x 30s', difficulty: 'Hard', targetMuscles: [{ slug: 'abs', intensity: 2 }, { slug: 'obliques', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'core', isRecommended: true },
+      { id: 'e5', name: 'Box Jumps', duration: '4 min', reps: '3 x 12', difficulty: 'Hard', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e6', name: 'Sprint Intervals', duration: '5 min', difficulty: 'Hard', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }, { slug: 'calves', intensity: 2 }], bodySide: 'front', category: 'cardio', muscleGroup: 'legs', isRecommended: false },
     ],
   },
   {
@@ -169,12 +172,12 @@ export const workoutPrograms: WorkoutProgram[] = [
     ],
     bodySide: 'back',
     exercises: [
-      { id: 'e1', name: 'Leg Swings', duration: '3 min', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e2', name: 'Goblet Squats', duration: '5 min', reps: '4 x 12', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e3', name: 'Walking Lunges', duration: '5 min', reps: '3 x 20', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e4', name: 'Calf Raises', duration: '4 min', reps: '3 x 20', targetMuscles: [{ slug: 'calves', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'legs', isRecommended: true },
-      { id: 'e5', name: 'Glute Bridges', duration: '4 min', reps: '3 x 15', targetMuscles: [{ slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'glutes', isRecommended: false },
-      { id: 'e6', name: 'Wall Sit', duration: '3 min', reps: '3 x 45s', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
+      { id: 'e1', name: 'Leg Swings', duration: '3 min', difficulty: 'Easy', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'front', category: 'warmup', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e2', name: 'Goblet Squats', duration: '5 min', reps: '4 x 12', difficulty: 'Medium', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e3', name: 'Walking Lunges', duration: '5 min', reps: '3 x 20', difficulty: 'Medium', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }, { slug: 'gluteal', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e4', name: 'Calf Raises', duration: '4 min', reps: '3 x 20', difficulty: 'Easy', targetMuscles: [{ slug: 'calves', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'legs', isRecommended: true },
+      { id: 'e5', name: 'Glute Bridges', duration: '4 min', reps: '3 x 15', difficulty: 'Easy', targetMuscles: [{ slug: 'gluteal', intensity: 2 }, { slug: 'hamstring', intensity: 2 }], bodySide: 'back', category: 'strength', muscleGroup: 'glutes', isRecommended: false },
+      { id: 'e6', name: 'Wall Sit', duration: '3 min', reps: '3 x 45s', difficulty: 'Medium', targetMuscles: [{ slug: 'quadriceps', intensity: 2 }], bodySide: 'front', category: 'strength', muscleGroup: 'legs', isRecommended: false },
     ],
   },
 ];

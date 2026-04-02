@@ -22,6 +22,10 @@ export default function WorkoutScreen() {
     ? workoutPrograms 
     : workoutPrograms.filter(w => w.category === selectedCategory);
 
+  const navigateToWorkout = (workoutId: string) => {
+    router.push(`/exercises/preference/${workoutId}`);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -52,7 +56,7 @@ export default function WorkoutScreen() {
           <FadeInView key={workout.id} index={index}>
           <AnimatedPressable
             style={styles.workoutCard}
-            onPress={() => router.push(`/exercises/preference/${workout.id}`)}
+            onPress={() => navigateToWorkout(workout.id)}
           >
             {/* Card Background */}
             <View style={styles.cardBackground}>
@@ -119,7 +123,10 @@ export default function WorkoutScreen() {
             </View>
 
             {/* Start Button */}
-            <TouchableOpacity style={styles.startButton} activeOpacity={0.85}>
+            <TouchableOpacity
+              style={styles.startButton}
+              activeOpacity={0.85}
+              onPress={() => navigateToWorkout(workout.id)}>
               <Text style={styles.startButtonText}>
                 {workout.progress > 0 ? 'Continue' : 'Start'}
               </Text>

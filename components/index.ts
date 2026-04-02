@@ -17,6 +17,7 @@ export { ProgressRing } from './ProgressRing';
 export { CategoryPills } from './CategoryPills';
 export { ScreenHeader } from './ScreenHeader';
 export { EmptyState } from './EmptyState';
+export { MessageModal } from './MessageModal';
 export { SettingsRow, SettingsSection } from './SettingsRow';
 
 // Skeletons

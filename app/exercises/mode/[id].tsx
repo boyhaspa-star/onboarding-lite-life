@@ -43,8 +43,8 @@ import {
 import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '@/constants/theme';
 import { getWorkoutById } from '@/data/workouts';
-import { AnimatedBodyView } from '@/components';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { MessageModal } from '@/components/MessageModal';
 import { useUserGender } from '@/hooks/useUserGender';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -103,6 +103,7 @@ export default function WorkoutModeScreen() {
   const userGender = useUserGender();
   const workout = getWorkoutById(id || '1');
   const [consentChecked, setConsentChecked] = useState(false);
+  const [showConsentModal, setShowConsentModal] = useState(false);
 
   // Entrance animations
   const bgFade = useRef(new Animated.Value(0)).current;
@@ -225,7 +226,10 @@ export default function WorkoutModeScreen() {
   }, []);
 
   const handleTrackMode = () => {
-    if (!consentChecked) return;
+    if (!consentChecked) {
+      setShowConsentModal(true);
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     router.push(`/exercises/${id}?mode=smart`);
   };
@@ -324,15 +328,15 @@ export default function WorkoutModeScreen() {
                 },
               ]}
             >
-              <AnimatedPressable onPress={handleTrackMode} style={[styles.card, !consentChecked && styles.cardDisabled]}>
+              <AnimatedPressable onPress={handleTrackMode} style={styles.card}>
                 {/* Glow border effect */}
                 <Animated.View
-                  style={[styles.cardGlow, styles.cardGlowLime, { opacity: consentChecked ? glow1Opacity : 0.05 }]}
+                  style={[styles.cardGlow, styles.cardGlowLime, { opacity: glow1Opacity }]}
                 />
 
                 {/* Card background */}
                 <LinearGradient
-                  colors={['rgba(205, 252, 0, 0.10)', 'rgba(205, 252, 0, 0.02)']}
+                  colors={['rgba(205, 252, 0, 0.18)', 'rgba(205, 252, 0, 0.06)']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.cardGradient}
@@ -394,7 +398,7 @@ export default function WorkoutModeScreen() {
 
                 {/* Card background */}
                 <LinearGradient
-                  colors={['rgba(255, 107, 53, 0.10)', 'rgba(255, 107, 53, 0.02)']}
+                  colors={['rgba(255, 107, 53, 0.18)', 'rgba(255, 107, 53, 0.06)']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.cardGradient}
@@ -456,6 +460,18 @@ export default function WorkoutModeScreen() {
           </Animated.View>
         </View>
       </SafeAreaView>
+
+      {/* Consent Modal */}
+      <MessageModal
+        visible={showConsentModal}
+        onClose={() => setShowConsentModal(false)}
+        variant="warning"
+        icon={<Shield size={32} color={colors.brand.cta} />}
+        title="Consent Required"
+        message="Please accept the camera & privacy policy consent before using AI-powered pose tracking."
+        primaryLabel="Got It"
+        onPrimary={() => setShowConsentModal(false)}
+      />
     </View>
   );
 }
@@ -538,7 +554,8 @@ const styles = StyleSheet.create({
     borderRadius: spacing.radius.xl,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.overlay.white10,
+    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
     position: 'relative',
   },
   cardGlow: {
